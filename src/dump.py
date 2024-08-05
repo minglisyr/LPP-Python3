@@ -182,15 +182,12 @@ d.extra(obj)				   extract bond/tri/line info from obj
 
 # Imports and external programs
 
-import sys, subprocess, re, glob, types
+import sys, re, glob, types
 from os import popen
 from math import *             # any function could be used by set()
 import os
 import numpy as np
 
-
-try: from DEFAULTS import PIZZA_GUNZIP
-except: PIZZA_GUNZIP = "gunzip"
 
 # Class definition
 

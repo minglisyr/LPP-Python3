@@ -93,7 +93,7 @@ m.curve(N,'b','-','v')         set color, line style, symbol of curve N
 
 # Imports and external programs
 
-import types, os
+import os
 
 try: from DEFAULTS import PIZZA_MATLAB
 except: PIZZA_MATLAB = "matlab -nosplash -nodesktop -nojvm"
