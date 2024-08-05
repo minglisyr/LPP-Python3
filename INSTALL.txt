@@ -1,0 +1,7 @@
+to install *liggghts post processing* (lpp) and pizza.py execute
+
+./install.sh
+
+or if you want to specify an install directory other then ~/bin
+
+./install.sh -p path/to/install/directory
