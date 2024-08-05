@@ -880,8 +880,7 @@ class dump:
     self.map(ncol+1,str)
     for snap in self.snaps:
       atoms = snap.atoms
-      if oldnumeric: newatoms = np.zeros((snap.natoms,ncol+1),np.Float)
-      else: newatoms = np.zeros((snap.natoms,ncol+1),np.float)
+      newatoms = np.zeros((snap.natoms,ncol+1),np.float)
       newatoms[:,0:ncol] = snap.atoms
       snap.atoms = newatoms
 
@@ -1179,7 +1178,7 @@ class tselect:
   
   # --------------------------------------------------------------------
 
-  def test(self,teststr):
+  def test(self,teststr,flag):
     data = self.data
     snaps = data.snaps
     cmd = "flag = " + teststr.replace("$t","snaps[i].time")
@@ -1218,7 +1217,7 @@ class aselect:
 
   # --------------------------------------------------------------------
 
-  def test(self,teststr,*args):
+  def test(self,teststr,*args,flag):
     data = self.data
 
     # replace all $var with snap.atoms references and compile test string
