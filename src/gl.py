@@ -125,6 +125,7 @@ g.sview(theta,phi,x,y,scale,up)      set all view parameters
 # Imports and external programs
 
 from math import sin,cos,sqrt,pi,acos
+import sys
 from OpenGL.Tk import *
 from OpenGL.GLUT import *
 import Image
@@ -585,133 +586,74 @@ class gl:
       
   # --------------------------------------------------------------------
 
-  def all(self,*list):
-    data = self.data
-    if len(list) == 0:
-      nstart = 0
-      ncount = data.nselect
-    elif len(list) == 1:
-      nstart = list[0]
-      ncount = data.nselect
-    else:
-      ntime = list[0]
-      nstart = list[2]
-      ncount = list[1]
+  def all(self, *args):
+      data = self.data
+      if len(args) == 0:
+          nstart, ncount = 0, data.nselect
+      elif len(args) == 1:
+          nstart, ncount = args[0], data.nselect
+      else:
+          ntime, ncount, nstart = args
 
-    if self.boxflag == 2: box = data.maxbox()
+      if self.boxflag == 2:
+          box = data.maxbox()
 
-    # loop over all selected steps
-    # distance from 1st snapshot box or max box for all selected steps
-    # recompute box center on 1st step or if panning
+      # Common function for both cases
+      def process_step(n, i, fraction, time, which=None):
+          if self.select:
+              newstr = self.select % fraction
+              data.aselect.test(newstr, time)
+          
+          time, boxone, atoms, bonds, tris, lines = data.viz(which if which is not None else data.iterator(flag)[0])
 
-    if len(list) <= 1:
+          if self.boxflag < 2:
+              box = boxone
+          if n == nstart:
+              self.distance = compute_distance(box)
 
-      n = nstart
-      i = flag = 0
-      while 1:
-        which,time,flag = data.iterator(flag)
-        if flag == -1: break
+          file = f"{self.file}{n:04d}"
 
-        fraction = float(i) / (ncount-1)
-        
-        if self.select != "":
-          newstr = self.select % fraction
-          data.aselect.test(newstr,time)
-        time,boxone,atoms,bonds,tris,lines = data.viz(which)
+          if self.panflag:
+              self.ztheta = self.ztheta_start + fraction * (self.ztheta_stop - self.ztheta_start)
+              self.azphi = self.azphi_start + fraction * (self.azphi_stop - self.azphi_start)
+              self.scale = self.scale_start + fraction * (self.scale_stop - self.scale_start)
+              self.viewupright()
 
-        if self.boxflag < 2: box = boxone
-        if n == nstart: self.distance = compute_distance(box)
+          if n == nstart or self.panflag:
+              self.center = compute_center(box)
 
-        if n < 10:     file = self.file + "000" + str(n)
-        elif n < 100:  file = self.file + "00" + str(n)
-        elif n < 1000: file = self.file + "0" + str(n)
-        else:          file = self.file + str(n)
+          if bonds:
+              self.bonds_augment(bonds)
 
-        if self.panflag:
-          self.ztheta = self.ztheta_start + \
-                        fraction*(self.ztheta_stop - self.ztheta_start)
-          self.azphi = self.azphi_start + \
-                       fraction*(self.azphi_stop - self.azphi_start)
-          self.scale = self.scale_start + \
-                          fraction*(self.scale_stop - self.scale_start)
-          self.viewupright()
+          self.boxdraw, self.atomdraw, self.bonddraw, self.tridraw, self.linedraw = box, atoms, bonds, tris, lines
 
-	if n == nstart or self.panflag: self.center = compute_center(box)
+          self.ready = 1
+          self.setview()
+          self.cachelist = -self.cachelist
+          self.w.tkRedraw()
+          self.save(file)
 
-        if bonds: self.bonds_augment(bonds)
+          print(time if len(args) <= 1 else n, end=' ')
+          sys.stdout.flush()
 
-        self.boxdraw = box
-        self.atomdraw = atoms
-        self.bonddraw = bonds
-        self.tridraw = tris
-        self.linedraw = lines
+      if len(args) <= 1:
+          n, i, flag = nstart, 0, 0
+          while True:
+              which, time, flag = data.iterator(flag)
+              if flag == -1:
+                  break
+              fraction = float(i) / (ncount - 1)
+              process_step(n, i, fraction, time)
+              i += 1
+              n += 1
+      else:
+          which = data.findtime(ntime)
+          for i in range(ncount):
+              fraction = float(i) / (ncount - 1)
+              n = nstart + i
+              process_step(n, i, fraction, ntime, which)
 
-        self.ready = 1
-        self.setview()
-        self.cachelist = -self.cachelist
-        self.w.tkRedraw()
-        self.save(file)
-        
-        print(time, end=' ')
-        sys.stdout.flush()
-        i += 1
-        n += 1
-
-    # loop ncount times on same step
-    # distance from 1st snapshot box or max box for all selected steps
-    # recompute box center on 1st step or if panning
-
-    else:
-
-      which = data.findtime(ntime)
-
-      n = nstart
-      for i in range(ncount):
-        fraction = float(i) / (ncount-1)
-
-        if self.select != "":
-          newstr = self.select % fraction
-          data.aselect.test(newstr,ntime)
-        time,boxone,atoms,bonds,tris,lines = data.viz(which)
-
-        if self.boxflag < 2: box = boxone
-        if n == nstart: self.distance = compute_distance(box)
-
-        if n < 10:     file = self.file + "000" + str(n)
-        elif n < 100:  file = self.file + "00" + str(n)
-        elif n < 1000: file = self.file + "0" + str(n)
-        else:          file = self.file + str(n)
-
-        if self.panflag:
-          self.ztheta = self.ztheta_start + \
-                        fraction*(self.ztheta_stop - self.ztheta_start)
-          self.azphi = self.azphi_start + \
-                       fraction*(self.azphi_stop - self.azphi_start)
-          self.scale = self.scale_start + \
-                          fraction*(self.scale_stop - self.scale_start)
-          self.viewupright()
-
-	if n == nstart or self.panflag: self.center = compute_center(box)
-
-        if bonds: self.bonds_augment(bonds)
-
-        self.boxdraw = box
-        self.atomdraw = atoms
-        self.bonddraw = bonds
-        self.tridraw = tris
-        self.linedraw = lines
-
-        self.ready = 1
-        self.setview()
-        self.cachelist = -self.cachelist
-        self.w.tkRedraw()
-        self.save(file)
-
-        print(n, end=' ')
-        sys.stdout.flush()
-        n += 1
-
-    print("\n%d images" % ncount)
+      print(f"\n{ncount} images")
 
   # --------------------------------------------------------------------
 
@@ -781,7 +723,7 @@ class gl:
         red,green,blue = self.vizinfo.lcolor[itype]
         glColor3f(red,green,blue)
         thick = self.vizinfo.lrad[itype]
-	glLineWidth(thick)
+	      glLineWidth(thick)
         glBegin(GL_LINES)
         glVertex3f(line[2],line[3],line[4])
         glVertex3f(line[5],line[6],line[7])

@@ -186,13 +186,8 @@ import sys, subprocess, re, glob, types
 from os import popen
 from math import *             # any function could be used by set()
 import os
+import numpy as np
 
-try:
-    import numpy as np
-    oldnumeric = False
-except:
-    import Numeric as np
-    oldnumeric = True
 
 try: from DEFAULTS import PIZZA_GUNZIP
 except: PIZZA_GUNZIP = "gunzip"
@@ -318,37 +313,41 @@ class dump:
   # read next snapshot from list of files
 
   def __next__(self):
-
-    if not self.increment: raise Exception("cannot read incrementally")
+    if not self.increment:
+        raise Exception("cannot read incrementally")
 
     # read next snapshot in current file using eof as pointer
     # if fail, try next file
     # if new snapshot time stamp already exists, read next snapshot
 
-    while 1:
-      f = open(self.flist[self.nextfile],'rb')
-      f.seek(self.eof)
-      snap = self.read_snapshot(f)
-      if not snap:
-        self.nextfile += 1
-	if self.nextfile == len(self.flist): return -1
-        f.close()
-	self.eof = 0
-	continue
-      self.eof = f.tell()
-      f.close()
-      try:
-        self.findtime(snap.time)
-	continue
-      except: break
+    while True:
+        try:
+            f = open(self.flist[self.nextfile], 'rb')
+            f.seek(self.eof)
+            snap = self.read_snapshot(f)
+            if not snap:
+                self.nextfile += 1
+                if self.nextfile == len(self.flist):
+                    return -1
+                self.eof = 0
+                continue
+            self.eof = f.tell()
+            f.close()
+            try:
+                self.findtime(snap.time)
+                continue
+            except:
+                break
+        except IndexError:
+            return -1
 
     # select the new snapshot with all its atoms
-
     self.snaps.append(snap)
     snap = self.snaps[self.nsnaps]
     snap.tselect = 1
     snap.nselect = snap.natoms
-    for i in range(snap.natoms): snap.aselect[i] = 1
+    for i in range(snap.natoms):
+        snap.aselect[i] = 1
     self.nsnaps += 1
     self.nselect += 1
 

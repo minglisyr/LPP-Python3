@@ -6,14 +6,13 @@ docstr = """this is the docstr of LIGGGHTSPostProcessing"""
 
 from dump import dump
 from math import floor
-from math import ceil
 import vtk
 import glob
 import multiprocessing
 import sys
 import time
 import os
-import exceptions
+
 # changes py p.s. - include a few command line options
 import getopt
 
