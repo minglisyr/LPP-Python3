@@ -182,12 +182,20 @@ d.extra(obj)				   extract bond/tri/line info from obj
 
 # Imports and external programs
 
-import sys, re, glob, types
+import sys, subprocess, re, glob, types
 from os import popen
 from math import *             # any function could be used by set()
 import os
-import numpy as np
 
+try:
+    import numpy as np
+    oldnumeric = False
+except:
+    import Numeric as np
+    oldnumeric = True
+
+try: from DEFAULTS import PIZZA_GUNZIP
+except: PIZZA_GUNZIP = "gunzip"
 
 # Class definition
 
@@ -310,41 +318,37 @@ class dump:
   # read next snapshot from list of files
 
   def __next__(self):
-    if not self.increment:
-        raise Exception("cannot read incrementally")
+
+    if not self.increment: raise Exception("cannot read incrementally")
 
     # read next snapshot in current file using eof as pointer
     # if fail, try next file
     # if new snapshot time stamp already exists, read next snapshot
 
-    while True:
-        try:
-            f = open(self.flist[self.nextfile], 'rb')
-            f.seek(self.eof)
-            snap = self.read_snapshot(f)
-            if not snap:
-                self.nextfile += 1
-                if self.nextfile == len(self.flist):
-                    return -1
-                self.eof = 0
-                continue
-            self.eof = f.tell()
-            f.close()
-            try:
-                self.findtime(snap.time)
-                continue
-            except:
-                break
-        except IndexError:
-            return -1
+    while 1:
+      f = open(self.flist[self.nextfile],'rb')
+      f.seek(self.eof)
+      snap = self.read_snapshot(f)
+      if not snap:
+        self.nextfile += 1
+	if self.nextfile == len(self.flist): return -1
+        f.close()
+	self.eof = 0
+	continue
+      self.eof = f.tell()
+      f.close()
+      try:
+        self.findtime(snap.time)
+	continue
+      except: break
 
     # select the new snapshot with all its atoms
+
     self.snaps.append(snap)
     snap = self.snaps[self.nsnaps]
     snap.tselect = 1
     snap.nselect = snap.natoms
-    for i in range(snap.natoms):
-        snap.aselect[i] = 1
+    for i in range(snap.natoms): snap.aselect[i] = 1
     self.nsnaps += 1
     self.nselect += 1
 
@@ -410,7 +414,8 @@ class dump:
         for i in range(1,snap.natoms):
           words += f.readline().split()
         floats = list(map(float,words))
-        atoms = np.zeros((snap.natoms,ncol),np.float)
+        if oldnumeric: atoms = np.zeros((snap.natoms,ncol),np.Float)
+        else: atoms = np.zeros((snap.natoms,ncol),np.float)
         start = 0
         stop = ncol
         for i in range(snap.natoms):
@@ -877,7 +882,8 @@ class dump:
     self.map(ncol+1,str)
     for snap in self.snaps:
       atoms = snap.atoms
-      newatoms = np.zeros((snap.natoms,ncol+1),np.float)
+      if oldnumeric: newatoms = np.zeros((snap.natoms,ncol+1),np.Float)
+      else: newatoms = np.zeros((snap.natoms,ncol+1),np.float)
       newatoms[:,0:ncol] = snap.atoms
       snap.atoms = newatoms
 
@@ -1175,7 +1181,7 @@ class tselect:
   
   # --------------------------------------------------------------------
 
-  def test(self,teststr,flag):
+  def test(self,teststr):
     data = self.data
     snaps = data.snaps
     cmd = "flag = " + teststr.replace("$t","snaps[i].time")
@@ -1214,7 +1220,7 @@ class aselect:
 
   # --------------------------------------------------------------------
 
-  def test(self,teststr,*args,flag):
+  def test(self,teststr,*args):
     data = self.data
 
     # replace all $var with snap.atoms references and compile test string

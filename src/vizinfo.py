@@ -16,6 +16,10 @@
 
 # Variables
 
+# Imports and external programs
+
+import types
+
 # Class definition
 
 class vizinfo:

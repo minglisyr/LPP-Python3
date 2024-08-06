@@ -54,8 +54,6 @@ l.write("file.txt","Time","PE",...)  write listed vectors to a file
 
 import sys, re, glob
 from os import popen
-import gzip
-
 
 try: tmp = PIZZA_GUNZIP
 except: PIZZA_GUNZIP = "gunzip"
@@ -124,57 +122,61 @@ class log:
 
   # --------------------------------------------------------------------
 
-  def get(self, *keys):
-      if len(keys) == 0:
-          raise ValueError("No log vectors specified")
+  def get(self,*keys):
+    if len(keys) == 0:
+      raise Exception("no log vectors specified")
 
-      map = []
-      for key in keys:
-          if key in self.ptr:
-              map.append(self.ptr[key])
-          else:
-              count = 0
-              index = -1
-              for i in range(self.nvec):
-                  if self.names[i].startswith(key):
-                      count += 1
-                      index = i
-              if count == 1:
-                  map.append(index)
-              else:
-                  raise ValueError(f"Unique log vector '{key}' not found")
+    map = []
+    for key in keys:
+      if key in self.ptr:
+        map.append(self.ptr[key])
+      else:
+        count = 0
+        for i in range(self.nvec):
+	  if self.names[i].find(key) == 0:
+	    count += 1
+	    index = i
+        if count == 1:
+          map.append(index)
+        else:
+          raise Exception("unique log vector %s not found" % key)
 
-      vecs = []
-      for i in range(len(keys)):
-          vecs.append([self.data[j][map[i]] for j in range(self.nlen)])
+    vecs = []
+    for i in range(len(keys)):
+      vecs.append(self.nlen * [0])
+      for j in range(self.nlen):
+        vecs[i][j] = self.data[j][map[i]]
 
-      return vecs[0] if len(keys) == 1 else vecs
+    if len(keys) == 1: return vecs[0]
+    else: return vecs
 
   # --------------------------------------------------------------------
 
-  def write(self, filename, *keys):
-    if keys:
-        map = []
-        for key in keys:
-            if key in self.ptr:
-                map.append(self.ptr[key])
-            else:
-                count = 0
-                index = -1
-                for i in range(self.nvec):
-                    if self.names[i].startswith(key):
-                        count += 1
-                        index = i
-                if count == 1:
-                    map.append(index)
-                else:
-                    raise ValueError(f"Unique log vector '{key}' not found")
+  def write(self,filename,*keys):
+    if len(keys):
+      map = []
+      for key in keys:
+        if key in self.ptr:
+          map.append(self.ptr[key])
+        else:
+          count = 0
+          for i in range(self.nvec):
+	    if self.names[i].find(key) == 0:
+	      count += 1
+	      index = i
+          if count == 1:
+            map.append(index)
+          else:
+            raise Exception("unique log vector %s not found" % key)
     else:
-        map = list(range(self.nvec))
+      map = list(range(self.nvec))
 
-    with open(filename, "w") as f:
-        for i in range(self.nlen):
-            print(' '.join(str(self.data[i][j]) for j in map), file=f)
+    f = open(filename,"w")
+    for i in range(self.nlen):
+      for j in range(len(map)):
+        print(self.data[i][map[j]], end=' ', file=f)
+      print(file=f)
+    f.close()
 
   # --------------------------------------------------------------------
 
@@ -195,134 +197,138 @@ class log:
       else: i += 1
 
   # --------------------------------------------------------------------
-  def read_header(self, file):
-      str_multi = "----- Step"
-      str_one = "Step "
 
-      if file.endswith(".gz"):
-          with gzip.open(file, 'rt') as f:
-              txt = f.read()
-      else:
-          with open(file, 'r') as f:
-              txt = f.read()
+  def read_header(self,file):
+    str_multi = "----- Step"
+    str_one = "Step "
 
-      if str_multi in txt:
-          self.firststr = str_multi
-          self.style = 1
-      elif str_one in txt:
-          self.firststr = str_one
-          self.style = 2
-      else:
-          return
+    if file[-3:] == ".gz":
+      txt = popen("%s -c %s" % (PIZZA_GUNZIP,file),'r').read()
+    else:
+      txt = open(file).read()
 
-      if self.style == 1:
-          s1 = txt.index(self.firststr)
-          s2 = txt.index("\n--", s1)
-          pattern = r"\s(\S*)\s*="
-          keywords = re.findall(pattern, txt[s1:s2])
-          keywords.insert(0, "Step")
-          for i, keyword in enumerate(keywords):
-              self.names.append(keyword)
-              self.ptr[keyword] = i
+    if txt.find(str_multi) >= 0:
+      self.firststr = str_multi
+      self.style = 1
+    elif txt.find(str_one) >= 0:
+      self.firststr = str_one
+      self.style = 2
+    else:
+      return
 
-      else:
-          s1 = txt.index(self.firststr)
-          s2 = txt.index("\n", s1)
-          line = txt[s1:s2]
-          words = line.split()
-          for i, word in enumerate(words):
-              self.names.append(word)
-              self.ptr[word] = i
+    if self.style == 1:
+      s1 = txt.find(self.firststr)
+      s2 = txt.find("\n--",s1)
+      pattern = "\s(\S*)\s*="
+      keywords = re.findall(pattern,txt[s1:s2])
+      keywords.insert(0,"Step")
+      i = 0
+      for keyword in keywords:
+	self.names.append(keyword)
+        self.ptr[keyword] = i
+        i += 1
 
-      self.nvec = len(self.names)
+    else:
+      s1 = txt.find(self.firststr)
+      s2 = txt.find("\n",s1)
+      line = txt[s1:s2]
+      words = line.split()
+      for i in range(len(words)):
+	self.names.append(words[i])
+        self.ptr[words[i]] = i
+
+    self.nvec = len(self.names)
 
   # --------------------------------------------------------------------
 
+  def read_one(self,*list):
 
-  def read_one(self, *args):
-      # if 2nd arg exists set file ptr to that value
-      # read entire (rest of) file into txt
+    # if 2nd arg exists set file ptr to that value
+    # read entire (rest of) file into txt
 
-      file = args[0]
-      if file.endswith(".gz"):
-          f = gzip.open(file, 'rt')
+    file = list[0]
+    if file[-3:] == ".gz":
+      f = popen("%s -c %s" % (PIZZA_GUNZIP,file),'rb')
+    else:
+      f = open(file,'rb')
+
+    if len(list) == 2: f.seek(list[1])
+    txt = f.read()
+    if file[-3:] == ".gz": eof = 0
+    else: eof = f.tell()
+    f.close()
+
+    start = last = 0
+    while not last:
+
+      # chunk = contiguous set of thermo entries (line or multi-line)
+      # s1 = 1st char on 1st line of chunk
+      # s2 = 1st char on line after chunk
+      # set last = 1 if this is last chunk in file, leave 0 otherwise
+      # set start = position in file to start looking for next chunk
+      # rewind eof if final entry is incomplete
+
+      s1 = txt.find(self.firststr,start)
+      s2 = txt.find("Loop time of",start+1)
+
+      if s1 >= 0 and s2 >= 0 and s1 < s2:    # found s1,s2 with s1 before s2
+        if self.style == 2:
+	  s1 = txt.find("\n",s1) + 1
+      elif s1 >= 0 and s2 >= 0 and s2 < s1:  # found s1,s2 with s2 before s1
+        s1 = 0
+      elif s1 == -1 and s2 >= 0:             # found s2, but no s1
+	last = 1
+        s1 = 0
+      elif s1 >= 0 and s2 == -1:             # found s1, but no s2
+        last = 1
+        if self.style == 1:
+          s2 = txt.rfind("\n--",s1) + 1
+        else:
+	  s1 = txt.find("\n",s1) + 1
+          s2 = txt.rfind("\n",s1) + 1
+	eof -= len(txt) - s2
+      elif s1 == -1 and s2 == -1:            # found neither
+                                             # could be end-of-file section
+					     # or entire read was one chunk
+
+        if txt.find("Loop time of",start) == start:   # end of file, so exit
+	  eof -= len(txt) - start                     # reset eof to "Loop"
+	  break
+
+	last = 1                                      # entire read is a chunk
+        s1 = 0
+        if self.style == 1:
+          s2 = txt.rfind("\n--",s1) + 1
+        else:
+          s2 = txt.rfind("\n",s1) + 1
+	eof -= len(txt) - s2
+	if s1 == s2: break
+
+      chunk = txt[s1:s2-1]
+      start = s2
+
+      # split chunk into entries
+      # parse each entry for numeric fields, append to data
+  
+      if self.style == 1:
+        sections = chunk.split("\n--")
+        pat1 = re.compile("Step\s*(\S*)\s")
+        pat2 = re.compile("=\s*(\S*)")
+        for section in sections:
+          word1 = [re.search(pat1,section).group(1)]
+          word2 = re.findall(pat2,section)
+          words = word1 + word2
+          self.data.append(list(map(float,words)))
+
       else:
-          f = open(file, 'r')
+        lines = chunk.split("\n")
+        for line in lines:
+          words = line.split()
+          self.data.append(list(map(float,words)))
 
-      if len(args) == 2:
-          f.seek(args[1])
-      txt = f.read()
-      eof = f.tell() if not file.endswith(".gz") else 0
-      f.close()
+      # print last timestep of chunk
 
-      start = 0
-      last = False
-      while not last:
-          # chunk = contiguous set of thermo entries (line or multi-line)
-          # s1 = 1st char on 1st line of chunk
-          # s2 = 1st char on line after chunk
-          # set last = True if this is last chunk in file, leave False otherwise
-          # set start = position in file to start looking for next chunk
-          # rewind eof if final entry is incomplete
+      print(int(self.data[len(self.data)-1][0]), end=' ')
+      sys.stdout.flush()
 
-          s1 = txt.find(self.firststr, start)
-          s2 = txt.find("Loop time of", start + 1)
-
-          if s1 >= 0 and s2 >= 0 and s1 < s2:    # found s1,s2 with s1 before s2
-              if self.style == 2:
-                  s1 = txt.find("\n", s1) + 1
-          elif s1 >= 0 and s2 >= 0 and s2 < s1:  # found s1,s2 with s2 before s1
-              s1 = 0
-          elif s1 == -1 and s2 >= 0:             # found s2, but no s1
-              last = True
-              s1 = 0
-          elif s1 >= 0 and s2 == -1:             # found s1, but no s2
-              last = True
-              if self.style == 1:
-                  s2 = txt.rfind("\n--", s1) + 1
-              else:
-                  s1 = txt.find("\n", s1) + 1
-                  s2 = txt.rfind("\n", s1) + 1
-              eof -= len(txt) - s2
-          elif s1 == -1 and s2 == -1:            # found neither
-              # could be end-of-file section or entire read was one chunk
-              if txt.find("Loop time of", start) == start:   # end of file, so exit
-                  eof -= len(txt) - start                     # reset eof to "Loop"
-                  break
-
-              last = True                                      # entire read is a chunk
-              s1 = 0
-              if self.style == 1:
-                  s2 = txt.rfind("\n--", s1) + 1
-              else:
-                  s2 = txt.rfind("\n", s1) + 1
-              eof -= len(txt) - s2
-              if s1 == s2:
-                  break
-
-          chunk = txt[s1:s2-1]
-          start = s2
-
-          # split chunk into entries
-          # parse each entry for numeric fields, append to data
-    
-          if self.style == 1:
-              sections = chunk.split("\n--")
-              pat1 = re.compile(r"Step\s*(\S*)\s")
-              pat2 = re.compile(r"=\s*(\S*)")
-              for section in sections:
-                  word1 = [re.search(pat1, section).group(1)]
-                  word2 = re.findall(pat2, section)
-                  words = word1 + word2
-                  self.data.append(list(map(float, words)))
-          else:
-              lines = chunk.split("\n")
-              for line in lines:
-                  words = line.split()
-                  self.data.append(list(map(float, words)))
-
-          # print last timestep of chunk
-          print(int(self.data[-1][0]), end=' ')
-          sys.stdout.flush()
-
-      return eof
+    return eof

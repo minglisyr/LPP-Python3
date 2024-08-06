@@ -126,11 +126,19 @@ m.etype = "color"                          set column returned as "type" by viz
 
 # Imports and external programs
 
-import sys, re, glob
+import sys, subprocess, re, glob, types
 from os import popen
 from math import *             # any function could be used by set()
-import numpy as np
-import gzip
+
+try:
+    import numpy as np
+    oldnumeric = False
+except:
+    import Numeric as np
+    oldnumeric = True
+
+try: from DEFAULTS import PIZZA_GUNZIP
+except: PIZZA_GUNZIP = "gunzip"
 
 # Class definition
 
@@ -171,7 +179,7 @@ class mdump:
 
     for file in self.flist:
       if file[-3:] == ".gz":
-        f = popen("%s -c %s" % (gzip,file),'r')
+        f = popen("%s -c %s" % (PIZZA_GUNZIP,file),'r')
       else: f = open(file)
 
       snap = self.read_snapshot(f)
@@ -308,7 +316,8 @@ class mdump:
         for i in range(1,n):
           words += f.readline().split()
         floats = list(map(float,words))
-        values = np.zeros((n,ncol),np.float)
+        if oldnumeric: values = np.zeros((n,ncol),np.Float)
+        else: values = np.zeros((n,ncol),np.float)
         start = 0
         stop = ncol
         for i in range(n):
@@ -783,7 +792,7 @@ class tselect:
   
   # --------------------------------------------------------------------
 
-  def test(self,teststr,flag):
+  def test(self,teststr):
     data = self.data
     snaps = data.snaps
     cmd = "flag = " + teststr.replace("$t","snaps[i].time")
@@ -822,7 +831,7 @@ class eselect:
 
   # --------------------------------------------------------------------
 
-  def test(self,teststr,*args,flag):
+  def test(self,teststr,*args):
     data = self.data
 
     # replace all $var with snap.atoms references and compile test string
