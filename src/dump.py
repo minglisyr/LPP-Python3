@@ -190,13 +190,7 @@ d.extra(obj)				   extract bond/tri/line info from obj
 
 # Imports and external programs
 
-
-try:
-    import numpy as np
-    oldnumeric = False
-except BaseException:
-    import Numeric as np
-    oldnumeric = True
+import numpy as np
 
 try:
     from DEFAULTS import PIZZA_GUNZIP
@@ -444,10 +438,7 @@ class dump:
                 for i in range(1, snap.natoms):
                     words += f.readline().split()
                 floats = list(map(float, words))
-                if oldnumeric:
-                    atoms = np.zeros((snap.natoms, ncol), np.Float)
-                else:
-                    atoms = np.zeros((snap.natoms, ncol), np.float)
+                atoms = np.zeros((snap.natoms, ncol), np.float)
                 start = 0
                 stop = ncol
                 for i in range(snap.natoms):
@@ -966,10 +957,7 @@ class dump:
         self.map(ncol + 1, str)
         for snap in self.snaps:
             atoms = snap.atoms
-            if oldnumeric:
-                newatoms = np.zeros((snap.natoms, ncol + 1), np.Float)
-            else:
-                newatoms = np.zeros((snap.natoms, ncol + 1), np.float)
+            newatoms = np.zeros((snap.natoms, ncol + 1), np.float)
             newatoms[:, 0:ncol] = snap.atoms
             snap.atoms = newatoms
 

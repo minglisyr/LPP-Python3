@@ -19,12 +19,11 @@
 
 import re
 import glob
-import exceptions
 import string
 import os
 import subprocess
 import sys
-from time import clock
+from time import perf_counter
 version = "LPP 1.0 based on pizza - 7 Oct 2011"
 
 intro = """
@@ -94,7 +93,7 @@ def trap(type, value, tback):
 
     # only check SyntaxErrors
 
-    if not isinstance(value, exceptions.SyntaxError):
+    if not isinstance(value, SyntaxError):
         sys.__excepthook__(type, value, tback)
         return
 
@@ -256,9 +255,9 @@ def trap(type, value, tback):
             return
         elif words[0][1:] == "time":
             cmd = string.join(words[1:])
-            t1 = clock()
+            t1 = perf_counter()
             exec(cmd, namespace)
-            t2 = clock()
+            t2 = perf_counter()
             print("CPU time = ", t2 - t1)
             return
 
