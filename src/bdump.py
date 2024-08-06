@@ -11,6 +11,7 @@
 import types
 import glob
 import re
+import subprocess
 import sys
 from os import popen
 oneline = "Read dump files with bond info"

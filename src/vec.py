@@ -8,6 +8,7 @@
 
 # vec tool
 
+import io
 oneline = "Create numeric vectors from columns in file or list of vecs"
 
 docstr = """
@@ -42,7 +43,7 @@ l.write("file.txt","col1",7,...)    write listed vectors to a file
 
 # Imports and external programs
 
-import io
+
 # Class definition
 
 
