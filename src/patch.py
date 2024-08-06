@@ -8,6 +8,7 @@
 
 # patch tool
 
+from __future__ import absolute_import
 from math import sqrt, pi, cos, sin
 from data import data
 oneline = "Create patchy Lennard-Jones particles for LAMMPS input"

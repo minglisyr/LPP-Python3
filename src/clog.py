@@ -8,6 +8,7 @@
 
 # clog tool
 
+from __future__ import absolute_import
 import glob
 import re
 import sys

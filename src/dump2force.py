@@ -27,6 +27,7 @@ and dump match the format here - this will be checked in future!
 
 """
 
+from __future__ import absolute_import
 from evtk.vtk import VtkFile, VtkGroup, VtkUnstructuredGrid
 from bdump import bdump
 import numpy as np
@@ -75,6 +76,7 @@ groupfile = VtkGroup(groupfile)
 
 fileindex = 0
 timestep = next(forcedata)
+
 
 # check that we have the right number of colums (>11)
 #
@@ -131,7 +133,7 @@ while timestep >= 0:
     if forcedata.snaps[fileindex].natoms == 0:
         vtufile = fileprefix + '_' + str(timestep) + '.vtu'
         vtufile = os.path.join(outputdir, vtufile)
-        vtuwrite = file(vtufile, 'w')
+        vtuwrite = open(vtufile, 'w')
         vtuwrite.write("""<?xml version="1.0"?>
 <VTKFile byte_order="LittleEndian" version="0.1" type="UnstructuredGrid">
 <UnstructuredGrid>

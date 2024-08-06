@@ -13,6 +13,7 @@ import glob
 import re
 import subprocess
 import sys
+import functools
 import os
 from math import *             # any function could be used by set()
 from os import popen
@@ -69,7 +70,7 @@ d.write("file",head,app)	   write selected steps/atoms to dump file
 d.scatter("tmp")		   write selected steps/atoms to multiple files
 
   write() can be specified with 2 additional flags
-    headd = 0/1 for no/yes snapshot header, app = 0/1 for write vs append
+    head = 0/1 for no/yes snapshot header, app = 0/1 for write vs append
   scatter() files are given timestep suffix: e.g. tmp.0, tmp.100, etc
 
 d.scale() 	    	  	   scale x,y,z to 0-1 for all timesteps
@@ -211,7 +212,6 @@ class dump:
     # --------------------------------------------------------------------
 
     def __init__(self, *input, **kwargs):
-
         self.snaps = []
         self.nsnaps = self.nselect = 0
         self.names = {}
@@ -287,7 +287,7 @@ class dump:
             while snap:
                 self.snaps.append(snap)
                 if outputfl:
-                    print(snap.time, end=' ')
+                    print(snap.time, end='')
                 self.fileNums.append(snap.time)
                 sys.stdout.flush()
                 snap = self.read_snapshot(f)
@@ -298,11 +298,11 @@ class dump:
 
         # sort entries by timestep, cull duplicates
 
-        self.snaps.sort(self.compare_time)
+        self.snaps.sort(key=functools.cmp_to_key(self.compare_time))
         self.fileNums.sort()
         self.cull()
         self.nsnaps = len(self.snaps)
-        # print "read %d snapshots" % self.nsnaps
+        # print("read %d snapshots" % self.nsnaps)
 
         # select all timesteps and atoms
 
@@ -340,7 +340,7 @@ class dump:
     # --------------------------------------------------------------------
     # read next snapshot from list of files
 
-    def __next__(self):
+    def next(self):
 
         if not self.increment:
             raise Exception("cannot read incrementally")
@@ -478,6 +478,7 @@ class dump:
         ndel = i = 0
         while i < self.nsnaps:
             if not self.snaps[i].tselect:
+                del self.fileNums[i]
                 del self.snaps[i]
                 self.nsnaps -= 1
                 ndel += 1
@@ -635,9 +636,9 @@ class dump:
     # convert column names assignment to a string, in column order
 
     def names2str(self):
-        ncol = max(self.names.values())  # len(self.snaps[0].atoms[0])
+        ncol = list(max(self.names.values()))  # len(self.snaps[0].atoms[0])
         pairs = list(self.names.items())
-        values = list(self.names.values())
+        values = self.names.values()
         str = ""
         for i in range(ncol):
             if i in values:
@@ -663,7 +664,7 @@ class dump:
             for snap in self.snaps:
                 if snap.tselect:
                     self.sort_one(snap, id)
-        elif type(list[0]) is bytes:
+        elif type(list[0]) is types.StringType:
             if outputfl:
                 print("Sorting selected snapshots by %s ..." % list[0])
             id = self.names[list[0]]

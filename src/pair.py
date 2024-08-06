@@ -8,6 +8,7 @@
 
 # pair tool
 
+from __future__ import absolute_import
 from math import sqrt
 oneline = "Compute LAMMPS pairwise energies"
 

@@ -8,6 +8,7 @@
 
 # raster tool
 
+from __future__ import absolute_import
 from math import fabs, atan, cos, sin
 import re
 import subprocess

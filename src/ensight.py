@@ -8,6 +8,7 @@
 
 # ensight tool
 
+from __future__ import absolute_import
 import types
 import sys
 oneline = "Convert LAMMPS snapshots or meshes to Ensight format"

@@ -5,7 +5,7 @@
 #-------------------------------------------------------
 # Further debugs ongoing
 
-## 1) 2to3 tool generate lots of indentation issues
+## 1) 2to3 and modernize tool generate lots of indentation issues
 ## 2) autopep8 tool to fix indentation issues
 ## 3) delete and reorganize some deprecated functions (exceptions, time.clock, etc) in lpp.py, pizza.py and dump.py
 ## 4) workflow needs to be optimized on windows/linux cross platforms (python functions not fully interchangable) 

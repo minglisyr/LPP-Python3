@@ -6,15 +6,17 @@
 # certain rights in this software.  This software is distributed under
 # the GNU General Public License.
 
+
 # animate tool
 
+from __future__ import absolute_import
 import glob
 import re
 import subprocess
 import os
 import sys
-from ImageTk import PhotoImage
 from tkinter import *
+from ImageTk import PhotoImage
 oneline = "Animate a series of image files"
 
 docstr = """
@@ -51,6 +53,7 @@ a.delay(0.4)     	      set delay slider
 #               set to 0 when stop is pushed
 #   delay_value = delay between frames (secs)
 #   delay_msec = delay in millisec
+
 
 # Imports and external programs
 
@@ -119,11 +122,7 @@ class animate:
             text="Play",
             command=self.play).pack(
             side=LEFT)
-        button6 = Button(
-            holder1,
-            text=">",
-            command=self.__next__).pack(
-            side=LEFT)
+        button6 = Button(holder1, text=">", command=self.next).pack(side=LEFT)
         button7 = Button(holder1, text=">>", command=self.last).pack(side=LEFT)
         holder1.pack(side=TOP)
 
@@ -176,7 +175,7 @@ class animate:
 
     # --------------------------------------------------------------------
 
-    def __next__(self):
+    def next(self):
         if self.index < self.nframes - 1:
             self.index += 1
         self.display(self.index)

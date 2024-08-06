@@ -8,13 +8,14 @@
 
 # tdump tool
 
+from __future__ import absolute_import
 import types
 import glob
 import re
 import subprocess
 import sys
-from os import popen
 from math import sqrt
+from os import popen
 oneline = "Read dump files with triangle info"
 
 docstr = """
@@ -151,7 +152,7 @@ class tdump:
     # --------------------------------------------------------------------
     # read next snapshot from list of files
 
-    def __next__(self):
+    def next(self):
 
         if not self.increment:
             raise Exception("cannot read incrementally")

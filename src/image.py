@@ -8,6 +8,7 @@
 
 # image tool
 
+from __future__ import absolute_import
 import glob
 import re
 import subprocess
@@ -15,9 +16,9 @@ import ImageTk
 import Image
 import os
 import sys
-import Pmw
-from tkinter import *
 from math import *
+from tkinter import *
+import Pmw
 oneline = "View and manipulate images"
 
 docstr = """

@@ -8,13 +8,14 @@
 
 # mdump tool
 
+from __future__ import absolute_import
 import types
 import glob
 import re
 import subprocess
 import sys
-from math import *             # any function could be used by set()
 from os import popen
+from math import *             # any function could be used by set()
 oneline = "Read, write, manipulate mesh dump files"
 
 docstr = """
@@ -248,7 +249,7 @@ class mdump:
     # --------------------------------------------------------------------
     # read next snapshot from list of files
 
-    def __next__(self):
+    def next(self):
 
         if not self.increment:
             raise Exception("cannot read incrementally")

@@ -8,6 +8,7 @@
 
 # svg tool
 
+from __future__ import absolute_import
 from math import sqrt, atan, cos, sin, fabs
 import re
 import subprocess

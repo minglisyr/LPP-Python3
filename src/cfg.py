@@ -8,6 +8,7 @@
 
 # cfg tool
 
+from __future__ import absolute_import
 import sys
 oneline = "Convert LAMMPS snapshots to AtomEye CFG format"
 

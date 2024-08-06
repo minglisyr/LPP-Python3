@@ -17,6 +17,7 @@
 
 # Help strings:
 
+from __future__ import absolute_import
 import re
 import glob
 import string
@@ -24,7 +25,7 @@ import os
 import subprocess
 import sys
 from time import perf_counter
-version = "LPP 1.0 based on pizza - 7 Oct 2011"
+version = "LPP 1.0 based on pizza - 2 Oct 2011"
 
 intro = """
 Pizza.py (%s), a toolkit written in Python
@@ -93,7 +94,7 @@ def trap(type, value, tback):
 
     # only check SyntaxErrors
 
-    if not isinstance(value, SyntaxError):
+    if not isinstance(value, exceptions.SyntaxError):
         sys.__excepthook__(type, value, tback)
         return
 
@@ -243,9 +244,7 @@ def trap(type, value, tback):
                     print("Executing file:", fullfile)
                     exec(
                         compile(
-                            open(
-                                fullfile,
-                                "rb").read(),
+                            open(fullfile).read(),
                             fullfile,
                             'exec'),
                         namespace)
@@ -443,13 +442,7 @@ for task in tasks:
                 fullfile = dir + '/' + file
                 if os.path.exists(fullfile):
                     print("Executing file:", fullfile)
-                    exec(
-                        compile(
-                            open(
-                                fullfile,
-                                "rb").read(),
-                            fullfile,
-                            'exec'))
+                    exec(compile(open(fullfile).read(), fullfile, 'exec'))
                     flag = 1
                     break
             if not flag:

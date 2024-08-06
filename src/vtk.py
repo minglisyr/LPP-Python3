@@ -136,7 +136,7 @@ class vtk:
         if "fileNos" in kwargs:
             fileNos = kwargs["fileNos"]
         else:
-            fileNos = list(range(len(self.data.snaps)))
+            fileNos = range(len(self.data.snaps))
 
         # output name
         if len(args) == 0:
@@ -366,12 +366,12 @@ def particleGran(file, atoms, names, n_values):
     print("POINT_DATA", len(atoms), file=f)
 
     if len(atoms) == 0:
-        print(file=f)
+        print('', file=f)
         f.close()
         return
 
     # print VECTORS
-    for key in list(vectors.keys()):
+    for key in vectors.keys():
 
         # don't print coodinates again
         if key == 'x':
@@ -395,7 +395,7 @@ def particleGran(file, atoms, names, n_values):
                   atom[vectors[key] + 2], file=f)
 
     # print SCALARS
-    for key in list(scalars.keys()):
+    for key in scalars.keys():
         scalartype = ''
         if atoms != []:
             scalartype = typestr(atoms[0][scalars[key]])
@@ -413,7 +413,7 @@ def particleGran(file, atoms, names, n_values):
         for atom in atoms:
             print(atom[scalars[key]], file=f)
 
-    print(file=f)
+    print('', file=f)
     f.close()
 
 
@@ -488,7 +488,7 @@ def findScalarsAndVectors(names):
             scalars[newname] = i
         i += 1
 
-    if 'x' not in list(vectors.keys()):
+    if 'x' not in vectors.keys():
         print("vector x y z has to be contained in dump file. please change liggghts input script accordingly.")
         exit()
 

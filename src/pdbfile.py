@@ -8,6 +8,7 @@
 
 # pdb tool
 
+from __future__ import absolute_import
 import urllib.error
 import urllib.parse
 import urllib.request

@@ -8,6 +8,7 @@
 
 # data tool
 
+from __future__ import absolute_import
 from os import popen
 oneline = "Read, write, manipulate LAMMPS data files"
 

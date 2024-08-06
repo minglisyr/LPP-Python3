@@ -10,11 +10,12 @@
 
 # cdata tool
 
+from __future__ import absolute_import
 from math import sqrt, pi, cos, sin, fabs
 import glob
 import sys
-from copy import deepcopy
 from os import popen
+from copy import deepcopy
 oneline = "Read, create, manipulate ChemCell data files"
 
 docstr = """

@@ -8,8 +8,9 @@
 
 # vcr tool
 
-import types
+from __future__ import absolute_import
 from tkinter import *
+import types
 oneline = "VCR-style GUI for 3d interactive OpenGL visualization"
 
 docstr = """
@@ -109,7 +110,7 @@ class vcr:
         Button(frame1, text="Back", command=self.back).pack(side=LEFT)
         Button(frame1, text="Stop", command=self.stop).pack(side=LEFT)
         Button(frame1, text="Play", command=self.play).pack(side=LEFT)
-        Button(frame1, text=">", command=self.__next__).pack(side=LEFT)
+        Button(frame1, text=">", command=self.next).pack(side=LEFT)
         Button(frame1, text=">>", command=self.last).pack(side=LEFT)
         frame1.pack()
 
@@ -227,7 +228,7 @@ class vcr:
 
     # --------------------------------------------------------------------
 
-    def __next__(self):
+    def next(self):
         if self.index < self.nframes - 1:
             self.index += 1
             self.slider_frame.set(self.index)

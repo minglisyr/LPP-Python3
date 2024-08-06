@@ -8,6 +8,7 @@
 
 # matlab tool
 
+from __future__ import absolute_import
 import os
 import types
 oneline = "Create plots via MatLab numerical analysis program"

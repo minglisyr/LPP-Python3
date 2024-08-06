@@ -8,6 +8,7 @@
 
 # bdump tool
 
+from __future__ import absolute_import
 import types
 import glob
 import re
@@ -143,7 +144,7 @@ class bdump:
     # --------------------------------------------------------------------
     # read next snapshot from list of files
 
-    def __next__(self):
+    def next(self):
 
         if not self.increment:
             raise Exception("cannot read incrementally")

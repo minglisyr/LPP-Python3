@@ -8,8 +8,9 @@
 
 # chain tool
 
-from data import data
+from __future__ import absolute_import
 import math
+from data import data
 oneline = "Create bead-spring chains for LAMMPS input"
 
 docstr = """

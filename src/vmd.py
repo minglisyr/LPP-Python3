@@ -14,9 +14,13 @@
 #   open a pipe to the executable,
 #   and feed it Tcl command lines one at a time
 
-import os
+# Imports and external programs
+
+from __future__ import absolute_import
 import types
+import os
 import numpy
+
 oneline = "Control VMD from python"
 
 docstr = """
@@ -42,8 +46,6 @@ v.debug([True|False])	       display generated VMD script commands?
 
 # History
 #   11/10, Axel Kohlmeyer (Temple U): original version
-
-# Imports and external programs
 
 
 try:

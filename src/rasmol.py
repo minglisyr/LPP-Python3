@@ -8,6 +8,7 @@
 
 # rasmol tool
 
+from __future__ import absolute_import
 import types
 import re
 import subprocess
