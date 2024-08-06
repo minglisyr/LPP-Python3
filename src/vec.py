@@ -3,11 +3,12 @@
 #
 # Copyright (2005) Sandia Corporation.  Under the terms of Contract
 # DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-# certain rights in this software.  This software is distributed under 
+# certain rights in this software.  This software is distributed under
 # the GNU General Public License.
 
 # vec tool
 
+import types
 oneline = "Create numeric vectors from columns in file or list of vecs"
 
 docstr = """
@@ -17,7 +18,7 @@ v = vec(array)                      array = list of numeric vectors
   skip blank lines and lines that start with non-numeric characters
   example array with 2 vecs = [[1,2,3,4,5], [10,20,30,40,50]]
   assigns names = "col1", "col2", etc
-  
+
 nvec = v.nvec                       # of vectors
 nlen = v.nlen		            lengths of vectors
 names = v.names		            list of vector names
@@ -42,104 +43,106 @@ l.write("file.txt","col1",7,...)    write listed vectors to a file
 
 # Imports and external programs
 
-import types
 
 # Class definition
 
+
 class vec:
 
-  # --------------------------------------------------------------------
+    # --------------------------------------------------------------------
 
-  def __init__(self,data):
-    self.data = []
-    
-    if type(data) == bytes:
-      lines = open(data,'r').readlines()
-      for line in lines:
-        words = line.split()
-        if len(words) and words[0][0] in "0123456789.-":
-          self.data.append(list(map(float,words)))
-    elif type(data) == list:
-      nlen = len(data[0])
-      for list in data[1:]:
-        if len(list) != nlen:
-          raise Exception("lists are not all same length")
-      for i in range(nlen):
-        values = [list[i] for list in data]
-        self.data.append(list(map(float,values)))
-    else:
-      raise Exception("invalid argument to vec")
-    
-    if len(self.data) == 0:
-      self.nlen = self.nvec = 0
-    else:
-      self.nlen = len(self.data)
-      self.nvec = len(self.data[0])
+    def __init__(self, data):
+        self.data = []
 
-    self.names = []
-    for i in range(self.nvec):
-      self.names.append(str("col%d" % (i+1)))
 
-    self.ptr = {}
-    for i in range(self.nvec):
-      self.ptr[self.names[i]] = i
+if isinstance(data,         if )            lines = open(data, 'r').readlines()
+            for line in lines:
+                words = line.split()
+                if len(words) and words[0][0] in "0123456789.-":
+                    self.data.append(list(map(float, words)))
+elif isinstance(data,         elif)            nlen = len(data[0])
+            for list in data[1:]:
+                if len(list) != nlen:
+                    raise Exception("lists are not all same length")
+            for i in range(nlen):
+                values = [list[i] for list in data]
+                self.data.append(list(map(float, values)))
+        else:
+            raise Exception("invalid argument to vec")
 
-    print("read %d vectors of length %d" % (self.nvec,self.nlen))
-    
-  # --------------------------------------------------------------------
+        if len(self.data) == 0:
+            self.nlen = self.nvec = 0
+        else:
+            self.nlen = len(self.data)
+            self.nvec = len(self.data[0])
 
-  def get(self,*keys):
-    if len(keys) == 0:
-      raise Exception("no vectors specified")
-
-    map = []
-    for key in keys:
-      if type(key) == int: map.append(key-1)
-      elif key in self.ptr: map.append(self.ptr[key])
-      else:
-        count = 0
+        self.names = []
         for i in range(self.nvec):
-	  if self.names[i].find(key) == 0:
-	    count += 1
-	    index = i
-        if count == 1:
-          map.append(index)
+            self.names.append(str("col%d" % (i +1)))
+
+        self.ptr = {}
+        for i in range(self.nvec):
+            self.ptr[self.names[i]] = i
+
+        print("read %d vectors of length %d" % (self.nvec, self.nlen))
+
+    # --------------------------------------------------------------------
+
+    def get(self, *keys):
+        if len(keys) == 0:
+            raise Exception("no vectors specified")
+
+        map = []
+        for key in keys:
+            if type(key) == int:
+                map.append(key-1)
+            elif key in self.ptr: map.append(self.ptr[key])
+            else:
+                count = 0
+                for i in range(self.nvec):
+                    if self.names[i].find(key) == 0:
+                        count += 1
+                        index = i
+                if count == 1:
+                    map.append(index)
+                else:
+                    raise Exception("unique vector %s not found" % key)
+
+        vecs = []
+        for i in range(len(keys)):
+            vecs.append(self.nlen * [0])
+            for j in range(self.nlen):
+                vecs[i][j] = self.data[j][map[i]]
+
+        if len(keys) == 1:
+            return vecs[0]
+        else: return vecs
+
+    # --------------------------------------------------------------------
+
+    def write(self, filename,*keys):
+        if len(keys):
+            map = []
+            for key in keys:
+                if type(key) == int:
+                    map.append(key-1)
+                elif key in self.ptr: map.append(self.ptr[key])
+                else:
+                    count = 0
+                    for i in range(self.nvec):
+                        if self.names[i].find(key) == 0:
+                            count += 1
+                            index = i
+                    if count == 1:
+                        map.append(index)
+                    else:
+                        raise Exception("unique vector %s not found" % key)
         else:
-          raise Exception("unique vector %s not found" % key)
+            map = list(range(self.nvec))
 
-    vecs = []
-    for i in range(len(keys)):
-      vecs.append(self.nlen * [0])
-      for j in range(self.nlen):
-        vecs[i][j] = self.data[j][map[i]]
-
-    if len(keys) == 1: return vecs[0]
-    else: return vecs
-
-  # --------------------------------------------------------------------
-
-  def write(self,filename,*keys):
-    if len(keys):
-      map = []
-      for key in keys:
-        if type(key) == int: map.append(key-1)
-        elif key in self.ptr: map.append(self.ptr[key])
-        else:
-          count = 0
-          for i in range(self.nvec):
-	    if self.names[i].find(key) == 0:
-	      count += 1
-	      index = i
-          if count == 1:
-            map.append(index)
-          else:
-            raise Exception("unique vector %s not found" % key)
-    else:
-      map = list(range(self.nvec))
-
-    f = open(filename,"w")
-    for i in range(self.nlen):
-      for j in range(len(map)):
-        print(self.data[i][map[j]], end=' ', file=f)
-      print(file=f)
-    f.close()
+        f = open(filename, "w")
+        for i in range(self.nlen):
+            for j in range(len(map)):
+                print(self.data[i][map[j]], end=' ', file=f)
+            print(file=f)
+        f.close()

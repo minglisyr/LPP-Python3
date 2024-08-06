@@ -3,11 +3,21 @@
 #
 # Copyright (2005) Sandia Corporation.  Under the terms of Contract
 # DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-# certain rights in this software.  This software is distributed under 
+# certain rights in this software.  This software is distributed under
 # the GNU General Public License.
 
 # image tool
 
+import glob
+import re
+import subprocess
+import ImageTk
+import Image
+import os
+import sys
+import Pmw
+from tkinter import *
+from math import *
 oneline = "View and manipulate images"
 
 docstr = """
@@ -48,186 +58,206 @@ i.montage("-geometry 512x512","i*.png","new.png")       1st arg is switch
 
 # Imports and external programs
 
-import sys, os, subprocess, re, glob
-from math import *
-from tkinter import *
-import Pmw
-import Image,ImageTk
 
-try: from DEFAULTS import PIZZA_CONVERT
-except: PIZZA_CONVERT = "convert"
-try: from DEFAULTS import PIZZA_MONTAGE
-except: PIZZA_MONTAGE = "montage"
+try:
+    from DEFAULTS import PIZZA_CONVERT
+except BaseException:
+    PIZZA_CONVERT = "convert"
+try:
+    from DEFAULTS import PIZZA_MONTAGE
+except BaseException:
+    PIZZA_MONTAGE = "montage"
 
 # Class definition
 
+
 class image:
-  
-  # --------------------------------------------------------------------
 
-  def __init__(self,filestr=None):
-    if filestr == None: return
-    self.view(filestr)
+    # --------------------------------------------------------------------
 
-  def view(self,filestr):
+    def __init__(self, filestr=None):
+        if filestr is None:
+            return
+        self.view(filestr)
 
-    # convert filestr into full list of files
+    def view(self, filestr):
 
-    if filestr == "": filestr = ' '.join(extensions)
-    list = str.split(filestr)
-    files = []
-    for file in list: files += glob.glob(file)
-    if len(files) == 0: raise Exception("no image files to load")
+        # convert filestr into full list of files
 
-    # grab Tk instance from main
+        if filestr == "":
+            filestr = ' '.join(extensions)
+        list = str.split(filestr)
+        files = []
+        for file in list:
+            files += glob.glob(file)
+        if len(files) == 0:
+            raise Exception("no image files to load")
 
-    from __main__ import tkroot
+        # grab Tk instance from main
 
-    # GUI control window
-    
-    gui = Toplevel(tkroot)
-    gui.title('Pizza.py image tool')
-    
-    scroll = \
-      Pmw.ScrolledFrame(gui,usehullsize=1,hull_width=420,hull_height=500)
-    pane = scroll.interior()
-    
-    ncolumns = 4
-    for i in range(len(files)):
-      
-      # create new row frame if 1st in column
-      
-      if i % ncolumns == 0: rowframe = Frame(pane)
-      oneframe = Frame(rowframe)
-      
-      # create a thumbnail of image
-      
-      im = Image.open(files[i])
-      imt = im.copy()
-      imt.thumbnail((60,60),Image.ANTIALIAS)
-      basename = os.path.basename(files[i])
-      imt.save("tmp." + basename)
-      thumbnail = ImageTk.PhotoImage(file = "tmp." + basename)
-      os.remove("tmp." + basename)
-      
-      # read in full size image
-      # create a thumbnail object that links to it
-      # create button that calls the thumbnail, label with filename
-      # buttton needs to store thumbnail else it is garbage collected
+        from __main__ import tkroot
 
-      big = ImageTk.PhotoImage(file=files[i])
-      obj = thumbnails(gui,files[i],big,thumbnail)
-      Button(oneframe,image=thumbnail,command=obj.display).pack(side=TOP)
-      Label(oneframe,text=basename).pack(side=BOTTOM)
-      
-      # pack into row frame
-      
-      oneframe.pack(side=LEFT)
-      if (i+1) % ncolumns == 0: rowframe.pack(side=TOP)
-      
-    if len(files) % ncolumns != 0: rowframe.pack(side=TOP)
-    scroll.pack(side=LEFT)     
+        # GUI control window
 
-  # --------------------------------------------------------------------
-  # wrapper on ImageMagick convert command
-  
-  def convert(self,file1,file2,switch=""):
-    if file1.find('*') < 0 or file2.find('*') < 0:
-      cmd = "%s %s %s %s" % (PIZZA_CONVERT,switch,file1,file2)
-      subprocess.getoutput(cmd)
-      return
+        gui = Toplevel(tkroot)
+        gui.title('Pizza.py image tool')
 
-    index = file1.index('*')
-    pre1 = file1[:index]
-    post1 = file1[index+1:]
-    index = file2.index('*')
-    pre2 = file2[:index]
-    post2 = file2[index+1:]
-    expr = "%s(.*)%s" % (pre1,post1)
+        scroll = Pmw.ScrolledFrame(
+            gui,
+            usehullsize=1,
+            hull_width=420,
+            hull_height=500)
+        pane = scroll.interior()
 
-    filelist = glob.glob(file1)
-    for file1 in filelist:
-      middle = re.search(expr,file1).group(1)
-      file2 = "%s%s%s" % (pre2,middle,post2)
-      cmd = "%s %s %s %s" % (PIZZA_CONVERT,switch,file1,file2)
-      print(middle, end=' ')
-      sys.stdout.flush()
-      subprocess.getoutput(cmd)
-    print()
+        ncolumns = 4
+        for i in range(len(files)):
 
-  # --------------------------------------------------------------------
-  # wrapper on ImageMagick montage command
+            # create new row frame if 1st in column
 
-  def montage(self,switch,*fileargs):
-    nsets = len(fileargs)
-    if nsets < 2: raise Exception("montage requires 2 or more file args")
+            if i % ncolumns == 0:
+                rowframe = Frame(pane)
+            oneframe = Frame(rowframe)
 
-    for i in range(nsets):
-      if fileargs[i].find('*') < 0:
-        cmd = "%s %s" % (PIZZA_MONTAGE,switch)
-        for j in range(nsets): cmd += " %s" % fileargs[j]
-        subprocess.getoutput(cmd)
-        return
-    
-    nfiles = len(glob.glob(fileargs[0]))
-    filesets = []
-    for i in range(nsets-1):
-      filesets.append(glob.glob(fileargs[i]))
-      if len(filesets[-1]) != nfiles:
-        raise Exception("each montage arg must represent equal # of files")
+            # create a thumbnail of image
 
-    index = fileargs[0].index('*')
-    pre1 = fileargs[0][:index]
-    post1 = fileargs[0][index+1:]
-    index = fileargs[-1].index('*')
-    preN = fileargs[-1][:index]
-    postN = fileargs[-1][index+1:]
-    expr = "%s(.*)%s" % (pre1,post1)
+            im = Image.open(files[i])
+            imt = im.copy()
+            imt.thumbnail((60, 60), Image.ANTIALIAS)
+            basename = os.path.basename(files[i])
+            imt.save("tmp." + basename)
+            thumbnail = ImageTk.PhotoImage(file="tmp." + basename)
+            os.remove("tmp." + basename)
 
-    for i in range(nfiles):
-      cmd = "%s %s" % (PIZZA_MONTAGE,switch)
-      for j in range(nsets-1): cmd += " %s" % filesets[j][i]
-      middle = re.search(expr,filesets[0][i]).group(1)
-      fileN = "%s%s%s" % (preN,middle,postN)
-      cmd += " %s" % fileN
-      subprocess.getoutput(cmd)
-      print(middle, end=' ')
-      sys.stdout.flush()
-    print()
+            # read in full size image
+            # create a thumbnail object that links to it
+            # create button that calls the thumbnail, label with filename
+            # buttton needs to store thumbnail else it is garbage collected
+
+            big = ImageTk.PhotoImage(file=files[i])
+            obj = thumbnails(gui, files[i], big, thumbnail)
+            Button(
+                oneframe,
+                image=thumbnail,
+                command=obj.display).pack(
+                side=TOP)
+            Label(oneframe, text=basename).pack(side=BOTTOM)
+
+            # pack into row frame
+
+            oneframe.pack(side=LEFT)
+            if (i + 1) % ncolumns == 0:
+                rowframe.pack(side=TOP)
+
+        if len(files) % ncolumns != 0:
+            rowframe.pack(side=TOP)
+        scroll.pack(side=LEFT)
+
+    # --------------------------------------------------------------------
+    # wrapper on ImageMagick convert command
+
+    def convert(self, file1, file2, switch=""):
+        if file1.find('*') < 0 or file2.find('*') < 0:
+            cmd = "%s %s %s %s" % (PIZZA_CONVERT, switch, file1, file2)
+            subprocess.getoutput(cmd)
+            return
+
+        index = file1.index('*')
+        pre1 = file1[:index]
+        post1 = file1[index + 1:]
+        index = file2.index('*')
+        pre2 = file2[:index]
+        post2 = file2[index + 1:]
+        expr = "%s(.*)%s" % (pre1, post1)
+
+        filelist = glob.glob(file1)
+        for file1 in filelist:
+            middle = re.search(expr, file1).group(1)
+            file2 = "%s%s%s" % (pre2, middle, post2)
+            cmd = "%s %s %s %s" % (PIZZA_CONVERT, switch, file1, file2)
+            print(middle, end=' ')
+            sys.stdout.flush()
+            subprocess.getoutput(cmd)
+        print()
+
+    # --------------------------------------------------------------------
+    # wrapper on ImageMagick montage command
+
+    def montage(self, switch, *fileargs):
+        nsets = len(fileargs)
+        if nsets < 2:
+            raise Exception("montage requires 2 or more file args")
+
+        for i in range(nsets):
+            if fileargs[i].find('*') < 0:
+                cmd = "%s %s" % (PIZZA_MONTAGE, switch)
+                for j in range(nsets):
+                    cmd += " %s" % fileargs[j]
+                subprocess.getoutput(cmd)
+                return
+
+        nfiles = len(glob.glob(fileargs[0]))
+        filesets = []
+        for i in range(nsets - 1):
+            filesets.append(glob.glob(fileargs[i]))
+            if len(filesets[-1]) != nfiles:
+                raise Exception(
+                    "each montage arg must represent equal # of files")
+
+        index = fileargs[0].index('*')
+        pre1 = fileargs[0][:index]
+        post1 = fileargs[0][index + 1:]
+        index = fileargs[-1].index('*')
+        preN = fileargs[-1][:index]
+        postN = fileargs[-1][index + 1:]
+        expr = "%s(.*)%s" % (pre1, post1)
+
+        for i in range(nfiles):
+            cmd = "%s %s" % (PIZZA_MONTAGE, switch)
+            for j in range(nsets - 1):
+                cmd += " %s" % filesets[j][i]
+            middle = re.search(expr, filesets[0][i]).group(1)
+            fileN = "%s%s%s" % (preN, middle, postN)
+            cmd += " %s" % fileN
+            subprocess.getoutput(cmd)
+            print(middle, end=' ')
+            sys.stdout.flush()
+        print()
 
 # --------------------------------------------------------------------
 # thumbnail class
-     
+
+
 class thumbnails:
 
-  def __init__(self,root,name,bigimage,thumbimage):
-    self.root = root
-    self.big = bigimage
-    self.thumb = thumbimage
-    self.name = name
-    self.bigexist = 0
-    self.window = None
-    
-  def display(self):
+    def __init__(self, root, name, bigimage, thumbimage):
+        self.root = root
+        self.big = bigimage
+        self.thumb = thumbimage
+        self.name = name
+        self.bigexist = 0
+        self.window = None
 
-    # destroy the big image window
-    
-    if self.bigexist:
-      self.bigexist = 0
-      if self.window:
-        self.window.destroy()
-	self.window = None
-    
-    # create a new window with the big image
-    
-    else:
-      self.bigexist = 1
-      self.window = Toplevel(self.root)
-      Label(self.window,text=self.name).pack(side=TOP)
-      Label(self.window,image=self.big).pack(side=BOTTOM)
+    def display(self):
+
+        # destroy the big image window
+
+        if self.bigexist:
+            self.bigexist = 0
+            if self.window:
+                self.window.destroy()
+                self.window = None
+
+        # create a new window with the big image
+
+        else:
+            self.bigexist = 1
+            self.window = Toplevel(self.root)
+            Label(self.window, text=self.name).pack(side=TOP)
+            Label(self.window, image=self.big).pack(side=BOTTOM)
 
 # --------------------------------------------------------------------
 # list of file extensions to test for
 # could add any extensions that PIL recognizes
 
-extensions = ["*.png", "*.bmp", "*.gif", "*.tiff", "*.tif"] 	
+
+extensions = ["*.png", "*.bmp", "*.gif", "*.tiff", "*.tif"]

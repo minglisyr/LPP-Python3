@@ -4,7 +4,7 @@
 
 d = dump("files/dump.peptide")
 d.unwrap()
-p = pdbfile("files/peptide",d)
+p = pdbfile("files/peptide", d)
 r = rasmol(p)
 r.file = "tmp"
 

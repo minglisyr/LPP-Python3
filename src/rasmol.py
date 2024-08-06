@@ -3,11 +3,17 @@
 #
 # Copyright (2005) Sandia Corporation.  Under the terms of Contract
 # DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-# certain rights in this software.  This software is distributed under 
+# certain rights in this software.  This software is distributed under
 # the GNU General Public License.
 
 # rasmol tool
 
+import types
+import re
+import subprocess
+import os
+import sys
+from pdbfile import pdbfile
 oneline = "3d visualization via RasMol program"
 
 docstr = """
@@ -20,7 +26,7 @@ r.show(N,"my.rasmol")   use file as RasMol script
 
 r.all()                 make images of all selected snapshots with def script
 r.all("my.rasmol")      use file as RasMol script
-  
+
 r.run(N)                run RasMol interactivly on snapshot N
 r.run(N,"new.rasmol")                 adjust via mouse or RasMol commands
 r.run(N,"new.rasmol","old.rasmol")    type quit to save RasMol script file
@@ -40,200 +46,208 @@ r.run(N,"new.rasmol","old.rasmol")    type quit to save RasMol script file
 
 # Imports and external programs
 
-import sys, os, subprocess, re, types
-from pdbfile import pdbfile
 
-try: from DEFAULTS import PIZZA_RASMOL
-except: PIZZA_RASMOL = "rasmol"
-try: from DEFAULTS import PIZZA_DISPLAY
-except: PIZZA_DISPLAY = "display"
+try:
+    from DEFAULTS import PIZZA_RASMOL
+except BaseException:
+    PIZZA_RASMOL = "rasmol"
+try:
+    from DEFAULTS import PIZZA_DISPLAY
+except BaseException:
+    PIZZA_DISPLAY = "display"
 
 # Class definition
 
+
 class rasmol:
 
-  # --------------------------------------------------------------------
+    # --------------------------------------------------------------------
 
-  def __init__(self,pdb):
-    self.pdb = pdb
-    self.file = "image"
-    
-  # --------------------------------------------------------------------
+    def __init__(self, pdb):
+        self.pdb = pdb
+        self.file = "image"
 
-  def start(self):
-    self.RASMOL = os.popen(PIZZA_RASMOL,'w')
+    # --------------------------------------------------------------------
 
-  # --------------------------------------------------------------------
+    def start(self):
+        self.RASMOL = os.popen(PIZZA_RASMOL, 'w')
 
-  def enter(self):
-    while 1:
-      command = input("rasmol> ")
-      if command == "quit" or command == "exit": return
-      self.__call__(command)
+    # --------------------------------------------------------------------
 
-  # --------------------------------------------------------------------
+    def enter(self):
+        while 1:
+            command = input("rasmol> ")
+            if command == "quit" or command == "exit":
+                return
+            self.__call__(command)
 
-  def __call__(self,command):
-    self.RASMOL.write(command + '\n')
-    self.RASMOL.flush()
+    # --------------------------------------------------------------------
 
-  # --------------------------------------------------------------------
+    def __call__(self, command):
+        self.RASMOL.write(command + '\n')
+        self.RASMOL.flush()
 
-  def stop(self):
-    self.__call__("quit")
-    del self.RASMOL
+    # --------------------------------------------------------------------
 
-  # --------------------------------------------------------------------
+    def stop(self):
+        self.__call__("quit")
+        del self.RASMOL
 
-  def show(self,*list):
+    # --------------------------------------------------------------------
 
-    # create tmp.pdb with atom data
-    
-    n = list[0]
-    self.pdb.single(n,"tmp.pdb")
+    def show(self, *list):
 
-    # if RasMol input script specified, read it
-    # replace load pdb "file" with load pdb "%s"
-    # if no RasMol input script specified, use rasmol_template
+        # create tmp.pdb with atom data
 
-    if len(list) == 2:
-      rasmol_text = open(list[1],"r").read()
-      rasmol_text = re.sub('load pdb ".*"','load pdb "%s"',rasmol_text)
-    else:
-      rasmol_text = rasmol_template
+        n = list[0]
+        self.pdb.single(n, "tmp.pdb")
 
-    # write rasmol_text to tmp.rasmol, substituting tmp.pdb for filename
-    
-    f = open("tmp.rasmol","w")
-    text = rasmol_text % "tmp.pdb"
-    print(text, file=f)
-    f.close()
+        # if RasMol input script specified, read it
+        # replace load pdb "file" with load pdb "%s"
+        # if no RasMol input script specified, use rasmol_template
 
-    # run RasMol to create image in tmp.gif
-    
-    self.start()
-    self.__call__("source tmp.rasmol")
-    self.__call__("write tmp.gif")
-    self.stop()
+        if len(list) == 2:
+            rasmol_text = open(list[1], "r").read()
+            rasmol_text = re.sub('load pdb ".*"', 'load pdb "%s"', rasmol_text)
+        else:
+            rasmol_text = rasmol_template
 
-    # display the image
-    
-    cmd = "%s tmp.gif" % (PIZZA_DISPLAY)
-    subprocess.getoutput(cmd)
+        # write rasmol_text to tmp.rasmol, substituting tmp.pdb for filename
 
-  # --------------------------------------------------------------------
+        f = open("tmp.rasmol", "w")
+        text = rasmol_text % "tmp.pdb"
+        print(text, file=f)
+        f.close()
 
-  def all(self,*list):
+        # run RasMol to create image in tmp.gif
 
-    # if RasMol script specified, read it
-    # replace load pdb "file" with load pdb "%s"
-    # if no RasMol script specified, just use rasmol_template
+        self.start()
+        self.__call__("source tmp.rasmol")
+        self.__call__("write tmp.gif")
+        self.stop()
 
-    if len(list) == 1:
-      rasmol_text = open(list[0],"r").read()
-      rasmol_text = re.sub('load pdb ".*"','load pdb "%s"',rasmol_text)
-    else:
-      rasmol_text = rasmol_template
-      
-    # iterate over all timesteps
-    # write snapshot to tmpN.pdb
-    # write RasMol input script to tmpN.rasmol
+        # display the image
 
-    n = flag = 0
-    while 1:
-      which,time,flag = self.pdb.iterator(flag)
+        cmd = "%s tmp.gif" % (PIZZA_DISPLAY)
+        subprocess.getoutput(cmd)
 
-      if flag == -1: break
+    # --------------------------------------------------------------------
 
-      if n < 10:
-        ncount = "000" + str(n)
-      elif n < 100:
-        ncount = "00" + str(n)
-      elif n < 1000:
-        ncount = "0" + str(n)
-      else:
-        ncount = str(n)
+    def all(self, *list):
 
-      file_pdb = "tmp%s.pdb" % ncount
-      self.pdb.single(time,file_pdb)
+        # if RasMol script specified, read it
+        # replace load pdb "file" with load pdb "%s"
+        # if no RasMol script specified, just use rasmol_template
 
-      text = rasmol_text % file_pdb
-      file_rasmol = "tmp%s.rasmol" % ncount
-      f = open(file_rasmol,"w")
-      print(text, file=f)
-      f.close()
+        if len(list) == 1:
+            rasmol_text = open(list[0], "r").read()
+            rasmol_text = re.sub('load pdb ".*"', 'load pdb "%s"', rasmol_text)
+        else:
+            rasmol_text = rasmol_template
 
-      print(time, end=' ')
-      sys.stdout.flush()
-      n += 1
+        # iterate over all timesteps
+        # write snapshot to tmpN.pdb
+        # write RasMol input script to tmpN.rasmol
 
-    # run RasMol on each pair of RasMol scripts and PDB files
+        n = flag = 0
+        while 1:
+            which, time, flag = self.pdb.iterator(flag)
 
-    self.start()
+            if flag == -1:
+                break
 
-    loop = n
-    for n in range(loop):
-      if n < 10:
-        ncount = "000" + str(n)
-      elif n < 100:
-        ncount = "00" + str(n)
-      elif n < 1000:
-        ncount = "0" + str(n)
-      else:
-        ncount = str(n)
+            if n < 10:
+                ncount = "000" + str(n)
+            elif n < 100:
+                ncount = "00" + str(n)
+            elif n < 1000:
+                ncount = "0" + str(n)
+            else:
+                ncount = str(n)
 
-      source_str = "source tmp%s.rasmol" % ncount
-      self.__call__(source_str)
-      write_str = "write %s%s.gif" % (self.file,ncount)
-      self.__call__(write_str)
+            file_pdb = "tmp%s.pdb" % ncount
+            self.pdb.single(time, file_pdb)
 
-    self.stop()
+            text = rasmol_text % file_pdb
+            file_rasmol = "tmp%s.rasmol" % ncount
+            f = open(file_rasmol, "w")
+            print(text, file=f)
+            f.close()
 
-    # clean up
+            print(time, end=' ')
+            sys.stdout.flush()
+            n += 1
 
-    subprocess.getoutput("rm tmp*.pdb")
-    subprocess.getoutput("rm tmp*.rasmol")
-    
-  # --------------------------------------------------------------------
+        # run RasMol on each pair of RasMol scripts and PDB files
 
-  def run(self,*list):
+        self.start()
 
-    # create tmp.pdb with atom data
+        loop = n
+        for n in range(loop):
+            if n < 10:
+                ncount = "000" + str(n)
+            elif n < 100:
+                ncount = "00" + str(n)
+            elif n < 1000:
+                ncount = "0" + str(n)
+            else:
+                ncount = str(n)
 
-    n = list[0]
-    self.pdb.single(n,"tmp.pdb")
+            source_str = "source tmp%s.rasmol" % ncount
+            self.__call__(source_str)
+            write_str = "write %s%s.gif" % (self.file, ncount)
+            self.__call__(write_str)
 
-    # if RasMol script specified, read it
-    # replace load pdb "file" with load pdb "%s"
-    # if no RasMol script specified, just use rasmol_template
+        self.stop()
 
-    if len(list) == 3:
-      rasmol_text = open(list[2],"r").read()
-      rasmol_text = re.sub('load pdb ".*"','load pdb "%s"',rasmol_text)
-    else:
-      rasmol_text = rasmol_template
+        # clean up
 
-    # write rasmol_text to tmp.rasmol
-    
-    f = open("tmp.rasmol","w")
-    text = rasmol_template % "tmp.pdb"
-    print(text, file=f)
-    f.close()
+        subprocess.getoutput("rm tmp*.pdb")
+        subprocess.getoutput("rm tmp*.rasmol")
 
-    # run RasMol to create image in tmp.gif
-    
-    self.start()
-    self.__call__("source tmp.rasmol")
-    self.enter()
-    
-    if len(list) > 1: newfile = list[1]
-    else: newfile = "tmp.rasmol"
-    self.__call__("write script %s" % newfile)
-    self.stop()
+    # --------------------------------------------------------------------
+
+    def run(self, *list):
+
+        # create tmp.pdb with atom data
+
+        n = list[0]
+        self.pdb.single(n, "tmp.pdb")
+
+        # if RasMol script specified, read it
+        # replace load pdb "file" with load pdb "%s"
+        # if no RasMol script specified, just use rasmol_template
+
+        if len(list) == 3:
+            rasmol_text = open(list[2], "r").read()
+            rasmol_text = re.sub('load pdb ".*"', 'load pdb "%s"', rasmol_text)
+        else:
+            rasmol_text = rasmol_template
+
+        # write rasmol_text to tmp.rasmol
+
+        f = open("tmp.rasmol", "w")
+        text = rasmol_template % "tmp.pdb"
+        print(text, file=f)
+        f.close()
+
+        # run RasMol to create image in tmp.gif
+
+        self.start()
+        self.__call__("source tmp.rasmol")
+        self.enter()
+
+        if len(list) > 1:
+            newfile = list[1]
+        else:
+            newfile = "tmp.rasmol"
+        self.__call__("write script %s" % newfile)
+        self.stop()
 
 # --------------------------------------------------------------------
 # generic Rasmol script with spacefill option
 # PDB filename must be filled in for load command
+
 
 rasmol_template = """
 # Creator: RasMol Version 2.7.1

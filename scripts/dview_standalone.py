@@ -9,6 +9,8 @@
 
 # enable script to run from Python directly w/out Pizza.py
 
+from vcr import vcr
+from gl import gl
 import sys
 from dump import dump
 
@@ -17,14 +19,13 @@ import tkinter
 tkroot = tkinter.Tk()
 tkroot.withdraw()
 
-from gl import gl
-from vcr import vcr
-if "argv" not in globals(): argv = sys.argv
+if "argv" not in globals():
+    argv = sys.argv
 
 # main script
 
 if len(argv) < 2:
-  raise Exception("Syntax: dview.py dump.1 ...")
+    raise Exception("Syntax: dview.py dump.1 ...")
 
 files = ' '.join(argv[1:])
 

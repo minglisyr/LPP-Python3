@@ -4,7 +4,7 @@
 
 lg = log("files/log.obstacle")
 g = gnu()
-p = plotview(lg,g)
+p = plotview(lg, g)
 
 p.select(1)
 p.select(6)

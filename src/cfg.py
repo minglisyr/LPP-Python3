@@ -3,11 +3,12 @@
 #
 # Copyright (2005) Sandia Corporation.  Under the terms of Contract
 # DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-# certain rights in this software.  This software is distributed under 
+# certain rights in this software.  This software is distributed under
 # the GNU General Public License.
 
 # cfg tool
 
+import sys
 oneline = "Convert LAMMPS snapshots to AtomEye CFG format"
 
 docstr = """
@@ -17,8 +18,8 @@ c.one()                 write all snapshots to tmp.cfg
 c.one("new")            write all snapshots to new.cfg
 c.many()                write snapshots to tmp0000.cfg, tmp0001.cfg, etc
 c.many("new")           write snapshots to new0000.cfg, new0001.cfg, etc
-c.single(N)             write snapshot for timestep N to tmp.cfg 
-c.single(N,"file")      write snapshot for timestep N to file.cfg 
+c.single(N)             write snapshot for timestep N to tmp.cfg
+c.single(N,"file")      write snapshot for timestep N to file.cfg
 """
 
 # History
@@ -36,152 +37,168 @@ c.single(N,"file")      write snapshot for timestep N to file.cfg
 
 # Imports and external programs
 
-import sys
 
 # Class definition
 
+
 class cfg:
 
-  # --------------------------------------------------------------------
+    # --------------------------------------------------------------------
 
-  def __init__(self,data):
-    self.data = data
-   
-  # --------------------------------------------------------------------
+    def __init__(self, data):
+        self.data = data
 
-  def one(self,*args):
-    if len(args) == 0: file = "tmp.cfg"
-    elif args[0][-4:] == ".cfg": file = args[0]
-    else: file = args[0] + ".cfg"
+    # --------------------------------------------------------------------
 
-    f = open(file,"w")
-    n = flag = 0
-    while 1:
-      which,time,flag = self.data.iterator(flag)
-      if flag == -1: break
-      time,box,atoms,bonds,tris,lines = self.data.viz(which)
+    def one(self, *args):
+        if len(args) == 0:
+            file = "tmp.cfg"
+        elif args[0][-4:] == ".cfg":
+            file = args[0]
+        else:
+            file = args[0] + ".cfg"
 
-      xlen = box[3]-box[0]
-      ylen = box[4]-box[1]
-      zlen = box[5]-box[2]
+        f = open(file, "w")
+        n = flag = 0
+        while 1:
+            which, time, flag = self.data.iterator(flag)
+            if flag == -1:
+                break
+            time, box, atoms, bonds, tris, lines = self.data.viz(which)
 
-      print("Number of particles = %d " % len(atoms), file=f)
-      print("# Timestep %d \n#\nA = 1.0 Angstrom" % time, file=f)
-      print("H0(1,1) = %20.10f A " % xlen, file=f)
-      print("H0(1,2) = 0.0 A ", file=f) 
-      print("H0(1,3) = 0.0 A ", file=f) 
-      print("H0(2,1) = 0.0 A ", file=f) 
-      print("H0(2,2) = %20.10f A " % ylen, file=f)
-      print("H0(2,3) = 0.0 A ", file=f) 
-      print("H0(3,1) = 0.0 A ", file=f) 
-      print("H0(3,2) = 0.0 A ", file=f) 
-      print("H0(3,3) = %20.10f A " % zlen, file=f)
-      print("#", file=f)
-      
-      for atom in atoms:
-        itype = int(atom[1])
-        xfrac = (atom[2]-box[0])/xlen
-        yfrac = (atom[3]-box[1])/ylen
-        zfrac = (atom[4]-box[2])/zlen
+            xlen = box[3] - box[0]
+            ylen = box[4] - box[1]
+            zlen = box[5] - box[2]
+
+            print("Number of particles = %d " % len(atoms), file=f)
+            print("# Timestep %d \n#\nA = 1.0 Angstrom" % time, file=f)
+            print("H0(1,1) = %20.10f A " % xlen, file=f)
+            print("H0(1,2) = 0.0 A ", file=f)
+            print("H0(1,3) = 0.0 A ", file=f)
+            print("H0(2,1) = 0.0 A ", file=f)
+            print("H0(2,2) = %20.10f A " % ylen, file=f)
+            print("H0(2,3) = 0.0 A ", file=f)
+            print("H0(3,1) = 0.0 A ", file=f)
+            print("H0(3,2) = 0.0 A ", file=f)
+            print("H0(3,3) = %20.10f A " % zlen, file=f)
+            print("#", file=f)
+
+            for atom in atoms:
+                itype = int(atom[1])
+                xfrac = (atom[2] - box[0]) / xlen
+                yfrac = (atom[3] - box[1]) / ylen
+                zfrac = (atom[4] - box[2]) / zlen
 #        print >>f,"1.0  %d   %15.10f  %15.10f  %15.10f  %15.10f  %15.10f  %15.10f " % (itype,xfrac,yfrac,zfrac,atom[5],atom[6],atom[7])
-        print("1.0  %d   %15.10f  %15.10f  %15.10f  0.0 0.0 0.0 " % (itype,xfrac,yfrac,zfrac), file=f)
-      
-      print(time, end=' ')
-      sys.stdout.flush()
-      n += 1
-      
-    f.close()
-    print("\nwrote %d snapshots to %s in CFG format" % (n,file))
-      
-  # --------------------------------------------------------------------
+                print(
+                    "1.0  %d   %15.10f  %15.10f  %15.10f  0.0 0.0 0.0 " %
+                    (itype, xfrac, yfrac, zfrac), file=f)
 
-  def many(self,*args):
-    if len(args) == 0: root = "tmp"
-    else: root = args[0]
+            print(time, end=' ')
+            sys.stdout.flush()
+            n += 1
 
-    n = flag = 0
-    while 1:
-      which,time,flag = self.data.iterator(flag)
-      if flag == -1: break
-      time,box,atoms,bonds,tris,lines = self.data.viz(which)
-      
-      if n < 10:
-        file = root + "000" + str(n)
-      elif n < 100:
-        file = root + "00" + str(n)
-      elif n < 1000:
-        file = root + "0" + str(n)
-      else:
-        file = root + str(n)  
-      file += ".cfg"
-      f = open(file,"w")
+        f.close()
+        print("\nwrote %d snapshots to %s in CFG format" % (n, file))
 
-      xlen = box[3]-box[0]
-      ylen = box[4]-box[1]
-      zlen = box[5]-box[2]
+    # --------------------------------------------------------------------
 
-      print("Number of particles = %d " % len(atoms), file=f)
-      print("# Timestep %d \n#\nA = 1.0 Angstrom" % time, file=f)
-      print("H0(1,1) = %20.10f A " % xlen, file=f)
-      print("H0(1,2) = 0.0 A ", file=f) 
-      print("H0(1,3) = 0.0 A ", file=f) 
-      print("H0(2,1) = 0.0 A ", file=f) 
-      print("H0(2,2) = %20.10f A " % ylen, file=f)
-      print("H0(2,3) = 0.0 A ", file=f) 
-      print("H0(3,1) = 0.0 A ", file=f) 
-      print("H0(3,2) = 0.0 A ", file=f) 
-      print("H0(3,3) = %20.10f A " % zlen, file=f)
-      print("#", file=f)
-      
-      for atom in atoms:
-        itype = int(atom[1])
-        xfrac = (atom[2]-box[0])/xlen
-        yfrac = (atom[3]-box[1])/ylen
-        zfrac = (atom[4]-box[2])/zlen
+    def many(self, *args):
+        if len(args) == 0:
+            root = "tmp"
+        else:
+            root = args[0]
+
+        n = flag = 0
+        while 1:
+            which, time, flag = self.data.iterator(flag)
+            if flag == -1:
+                break
+            time, box, atoms, bonds, tris, lines = self.data.viz(which)
+
+            if n < 10:
+                file = root + "000" + str(n)
+            elif n < 100:
+                file = root + "00" + str(n)
+            elif n < 1000:
+                file = root + "0" + str(n)
+            else:
+                file = root + str(n)
+            file += ".cfg"
+            f = open(file, "w")
+
+            xlen = box[3] - box[0]
+            ylen = box[4] - box[1]
+            zlen = box[5] - box[2]
+
+            print("Number of particles = %d " % len(atoms), file=f)
+            print("# Timestep %d \n#\nA = 1.0 Angstrom" % time, file=f)
+            print("H0(1,1) = %20.10f A " % xlen, file=f)
+            print("H0(1,2) = 0.0 A ", file=f)
+            print("H0(1,3) = 0.0 A ", file=f)
+            print("H0(2,1) = 0.0 A ", file=f)
+            print("H0(2,2) = %20.10f A " % ylen, file=f)
+            print("H0(2,3) = 0.0 A ", file=f)
+            print("H0(3,1) = 0.0 A ", file=f)
+            print("H0(3,2) = 0.0 A ", file=f)
+            print("H0(3,3) = %20.10f A " % zlen, file=f)
+            print("#", file=f)
+
+            for atom in atoms:
+                itype = int(atom[1])
+                xfrac = (atom[2] - box[0]) / xlen
+                yfrac = (atom[3] - box[1]) / ylen
+                zfrac = (atom[4] - box[2]) / zlen
 #        print >>f,"1.0  %d   %15.10f  %15.10f  %15.10f  %15.10f  %15.10f  %15.10f " % (itype,xfrac,yfrac,zfrac,atom[5],atom[6],atom[7])
-        print("1.0  %d   %15.10f  %15.10f  %15.10f  0.0 0.0 0.0 " % (itype,xfrac,yfrac,zfrac), file=f)
-      
-      print(time, end=' ')
-      sys.stdout.flush()
-      f.close()
-      n += 1
-  
-    print("\nwrote %s snapshots in CFG format" % n)
-  
-  # --------------------------------------------------------------------
+                print(
+                    "1.0  %d   %15.10f  %15.10f  %15.10f  0.0 0.0 0.0 " %
+                    (itype, xfrac, yfrac, zfrac), file=f)
 
-  def single(self,time,*args):
-    if len(args) == 0: file = "tmp.cfg"
-    elif args[0][-4:] == ".cfg": file = args[0]
-    else: file = args[0] + ".cfg"
+            print(time, end=' ')
+            sys.stdout.flush()
+            f.close()
+            n += 1
 
-    which = self.data.findtime(time)
-    time,box,atoms,bonds,tris,lines = self.data.viz(which)
-    f = open(file,"w")
+        print("\nwrote %s snapshots in CFG format" % n)
 
-    xlen = box[3]-box[0]
-    ylen = box[4]-box[1]
-    zlen = box[5]-box[2]
+    # --------------------------------------------------------------------
 
-    print("Number of particles = %d " % len(atoms), file=f)
-    print("# Timestep %d \n#\nA = 1.0 Angstrom" % time, file=f)
-    print("H0(1,1) = %20.10f A " % xlen, file=f)
-    print("H0(1,2) = 0.0 A ", file=f) 
-    print("H0(1,3) = 0.0 A ", file=f) 
-    print("H0(2,1) = 0.0 A ", file=f) 
-    print("H0(2,2) = %20.10f A " % ylen, file=f)
-    print("H0(2,3) = 0.0 A ", file=f) 
-    print("H0(3,1) = 0.0 A ", file=f) 
-    print("H0(3,2) = 0.0 A ", file=f) 
-    print("H0(3,3) = %20.10f A " % zlen, file=f)
-    print("#", file=f)
-      
-    for atom in atoms:
-      itype = int(atom[1])
-      xfrac = (atom[2]-box[0])/xlen
-      yfrac = (atom[3]-box[1])/ylen
-      zfrac = (atom[4]-box[2])/zlen
+    def single(self, time, *args):
+        if len(args) == 0:
+            file = "tmp.cfg"
+        elif args[0][-4:] == ".cfg":
+            file = args[0]
+        else:
+            file = args[0] + ".cfg"
+
+        which = self.data.findtime(time)
+        time, box, atoms, bonds, tris, lines = self.data.viz(which)
+        f = open(file, "w")
+
+        xlen = box[3] - box[0]
+        ylen = box[4] - box[1]
+        zlen = box[5] - box[2]
+
+        print("Number of particles = %d " % len(atoms), file=f)
+        print("# Timestep %d \n#\nA = 1.0 Angstrom" % time, file=f)
+        print("H0(1,1) = %20.10f A " % xlen, file=f)
+        print("H0(1,2) = 0.0 A ", file=f)
+        print("H0(1,3) = 0.0 A ", file=f)
+        print("H0(2,1) = 0.0 A ", file=f)
+        print("H0(2,2) = %20.10f A " % ylen, file=f)
+        print("H0(2,3) = 0.0 A ", file=f)
+        print("H0(3,1) = 0.0 A ", file=f)
+        print("H0(3,2) = 0.0 A ", file=f)
+        print("H0(3,3) = %20.10f A " % zlen, file=f)
+        print("#", file=f)
+
+        for atom in atoms:
+            itype = int(atom[1])
+            xfrac = (atom[2] - box[0]) / xlen
+            yfrac = (atom[3] - box[1]) / ylen
+            zfrac = (atom[4] - box[2]) / zlen
 #        print >>f,"1.0  %d   %15.10f  %15.10f  %15.10f  %15.10f  %15.10f  %15.10f " % (itype,xfrac,yfrac,zfrac,atom[5],atom[6],atom[7])
-      print("1.0  %d   %15.10f  %15.10f  %15.10f  0.0 0.0 0.0 " % (itype,xfrac,yfrac,zfrac), file=f)
-      
-    f.close()
+            print(
+                "1.0  %d   %15.10f  %15.10f  %15.10f  0.0 0.0 0.0 " %
+                (itype, xfrac, yfrac, zfrac), file=f)
+
+        f.close()

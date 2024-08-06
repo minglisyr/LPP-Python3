@@ -15,17 +15,17 @@ from log import log
 from plotview import plotview
 from gnu import gnu
 from matlab import matlab
-if "argv" not in globals(): argv = sys.argv
+if "argv" not in globals():
+    argv = sys.argv
 
 # main script
 
 if len(argv) < 3:
-  raise Exception("Syntax: logview.py gnu/matlab files  ...")
+    raise Exception("Syntax: logview.py gnu/matlab files  ...")
 
 style = argv[1]
 files = ' '.join(argv[2:])
 
 lg = log(files)
 exec("plot = %s()" % style)
-p = plotview(lg,plot)
-
+p = plotview(lg, plot)

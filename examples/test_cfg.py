@@ -7,6 +7,6 @@ d.sort()
 x = cfg(d)
 x.one()
 x.many()
-x.single(0,"tmp.single")
+x.single(0, "tmp.single")
 
 print("all done ... type CTRL-D to exit Pizza.py")

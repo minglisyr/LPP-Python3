@@ -4,7 +4,7 @@
 # Purpose: create images from LAMMPS dump snapshots
 # Syntax:  movie.py raster/svg theta phi dump.1 dump.2 ...
 #          raster/svg = style of image to create
-#	   theta/phi = vertical (z) and azimuthal angle to view from
+# theta/phi = vertical (z) and azimuthal angle to view from
 #          files = one or more dump files
 # Example: movie.py svg 60 130 dump.*
 # Author:  Steve Plimpton (Sandia)
@@ -15,12 +15,13 @@ import sys
 from dump import dump
 from raster import raster
 from svg import svg
-if "argv" not in globals(): argv = sys.argv
+if "argv" not in globals():
+    argv = sys.argv
 
 # main script
 
 if len(argv) < 5:
-  raise Exception("Syntax: movie.py raster/svg theta phi dump.1 ...")
+    raise Exception("Syntax: movie.py raster/svg theta phi dump.1 ...")
 
 style = argv[1]
 theta = float(argv[2])
@@ -29,5 +30,5 @@ files = ' '.join(argv[4:])
 
 d = dump(files)
 exec("viz = %s(d)" % style)
-viz.rotate(theta,phi)
+viz.rotate(theta, phi)
 viz.all()

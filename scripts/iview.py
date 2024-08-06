@@ -11,10 +11,12 @@
 
 import sys
 from animate import animate
-if "argv" not in globals(): argv = sys.argv
+if "argv" not in globals():
+    argv = sys.argv
 
 # main script
 # this could be done with one-line alias in shell start-up file
 
-if len(argv) < 2: raise Exception("Syntax: iview.py files  ...")
+if len(argv) < 2:
+    raise Exception("Syntax: iview.py files  ...")
 a = animate(' '.join(argv[1:]))

@@ -3,7 +3,7 @@
 #
 # Copyright (2005) Sandia Corporation.  Under the terms of Contract
 # DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-# certain rights in this software.  This software is distributed under 
+# certain rights in this software.  This software is distributed under
 # the GNU General Public License.
 
 # --------------
@@ -23,8 +23,8 @@
 #   typically done for auxiliary Python files that are not tools
 #   any non-tool Python files from your TOOLS dirs should be added to list
 
-#PIZZA_TOOLS = ["~/mystuff/new_pizza_tools"]
-#PIZZA_SCRIPTS = ["~/mystuff/new_pizza_scripts"]
+# PIZZA_TOOLS = ["~/mystuff/new_pizza_tools"]
+# PIZZA_SCRIPTS = ["~/mystuff/new_pizza_scripts"]
 PIZZA_EXCLUDE = ["pizza", "DEFAULTS", "vizinfo", "dump2force"]
 
 # --------------
@@ -46,9 +46,9 @@ PIZZA_EXCLUDE = ["pizza", "DEFAULTS", "vizinfo", "dump2force"]
 # MONTAGE = program to stitch 2 images together
 # tools that use it: image
 
-#PIZZA_DISPLAY = "/usr/bin/display"
-#PIZZA_CONVERT = "/usr/bin/convert"
-#PIZZA_MONTAGE = "/usr/bin/montage"
+# PIZZA_DISPLAY = "/usr/bin/display"
+# PIZZA_CONVERT = "/usr/bin/convert"
+# PIZZA_MONTAGE = "/usr/bin/montage"
 
 # --------------
 
@@ -56,16 +56,16 @@ PIZZA_EXCLUDE = ["pizza", "DEFAULTS", "vizinfo", "dump2force"]
 # GNUTERM = terminal setting used by GnuPlot
 # tools that use it: gnu
 
-#PIZZA_GNUPLOT = "gnuplot"
-#PIZZA_GNUTERM = "x11"
-#PIZZA_GNUTERM = "aqua"                   # for Macs with Aquaterm installed
+# PIZZA_GNUPLOT = "gnuplot"
+# PIZZA_GNUTERM = "x11"
+# PIZZA_GNUTERM = "aqua"                   # for Macs with Aquaterm installed
 
 # --------------
 
 # GUNZIP = program to uncompress gzipped files
 # tools that use it: data dump log
 
-#PIZZA_GUNZIP = "gunzip"
+# PIZZA_GUNZIP = "gunzip"
 
 # --------------
 
@@ -73,34 +73,34 @@ PIZZA_EXCLUDE = ["pizza", "DEFAULTS", "vizinfo", "dump2force"]
 # RENDER = the Raster3D visualization rendering engine
 # tools that use it: raster
 
-#PIZZA_LABEL3D = "label3d"
-#PIZZA_RENDER = "render"
+# PIZZA_LABEL3D = "label3d"
+# PIZZA_RENDER = "render"
 
 # --------------
 
 # MATLAB = the MatLab numerical analysis and plotting package
 # tools that use it: matlab
 
-#PIZZA_MATLAB = "matlab -nosplash -nodesktop -nojvm"
+# PIZZA_MATLAB = "matlab -nosplash -nodesktop -nojvm"
 
 # --------------
 
 # RASMOL = the RasMol visualization package
 # tools that use it: rasmol
 
-#PIZZA_RASMOL = "rasmol"
+# PIZZA_RASMOL = "rasmol"
 
 # --------------
 
 # VMD = the VMD visualization package
 # tools that use it: vmd
 
-#PIZZA_VMDNAME = "vmd"                 # good settings for a Linux box
-#PIZZA_VMDDIR = "/usr/local/lib/vmd"
-#PIZZA_VMDDEV = "win"
-#PIZZA_VMDARCH = "LINUX"
+# PIZZA_VMDNAME = "vmd"                 # good settings for a Linux box
+# PIZZA_VMDDIR = "/usr/local/lib/vmd"
+# PIZZA_VMDDEV = "win"
+# PIZZA_VMDARCH = "LINUX"
 
-#PIZZA_VMDNAME = "vmd"                 # good settings for a Mac
-#PIZZA_VMDDIR = "/Applications/VMD\ 1.8.7.app/Contents/vmd"
-#PIZZA_VMDDEV = "win"
-#PIZZA_VMDARCH = "MACOSXX86"
+# PIZZA_VMDNAME = "vmd"                 # good settings for a Mac
+# PIZZA_VMDDIR = "/Applications/VMD\ 1.8.7.app/Contents/vmd"
+# PIZZA_VMDDEV = "win"
+# PIZZA_VMDARCH = "MACOSXX86"
