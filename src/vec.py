@@ -8,7 +8,6 @@
 
 # vec tool
 
-import types
 oneline = "Create numeric vectors from columns in file or list of vecs"
 
 docstr = """
@@ -43,7 +42,7 @@ l.write("file.txt","col1",7,...)    write listed vectors to a file
 
 # Imports and external programs
 
-
+import io
 # Class definition
 
 
@@ -53,38 +52,36 @@ class vec:
 
     def __init__(self, data):
         self.data = []
-
-
-if isinstance(data,         if )            lines = open(data, 'r').readlines()
+        
+        if isinstance(data, str):
+            with open(data, 'r') as file:
+                lines = file.readlines()
             for line in lines:
                 words = line.split()
-                if len(words) and words[0][0] in "0123456789.-":
+                if words and words[0][0] in "0123456789.-":
                     self.data.append(list(map(float, words)))
-elif isinstance(data,         elif)            nlen = len(data[0])
-            for list in data[1:]:
-                if len(list) != nlen:
-                    raise Exception("lists are not all same length")
+        elif isinstance(data, list):
+            nlen = len(data[0])
+            for lst in data[1:]:
+                if len(lst) != nlen:
+                    raise ValueError("Lists are not all the same length")
             for i in range(nlen):
-                values = [list[i] for list in data]
+                values = [lst[i] for lst in data]
                 self.data.append(list(map(float, values)))
         else:
-            raise Exception("invalid argument to vec")
-
-        if len(self.data) == 0:
+            raise ValueError("Invalid argument to vec")
+        
+        if not self.data:
             self.nlen = self.nvec = 0
         else:
             self.nlen = len(self.data)
             self.nvec = len(self.data[0])
 
-        self.names = []
-        for i in range(self.nvec):
-            self.names.append(str("col%d" % (i +1)))
+        self.names = [f"col{i+1}" for i in range(self.nvec)]
 
-        self.ptr = {}
-        for i in range(self.nvec):
-            self.ptr[self.names[i]] = i
+        self.ptr = {name: i for i, name in enumerate(self.names)}
 
-        print("read %d vectors of length %d" % (self.nvec, self.nlen))
+        print(f"read {self.nvec} vectors of length {self.nlen}")
 
     # --------------------------------------------------------------------
 
