@@ -94,7 +94,7 @@ def trap(type, value, tback):
 
     # only check SyntaxErrors
 
-    if not isinstance(value, exceptions.SyntaxError):
+    if not isinstance(value, SyntaxError):
         sys.__excepthook__(type, value, tback)
         return
 
