@@ -2,7 +2,7 @@
 # requires files/data.micelle
 # creates tmp.data
 
-from __future__ import absolute_import
+from __future__ import print_function, absolute_import
 from builtins import range
 
 d = data("files/data.micelle")

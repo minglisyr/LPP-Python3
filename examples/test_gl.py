@@ -2,7 +2,7 @@
 # requires files/dump.kinase
 # creates tmp*.png
 
-from __future__ import absolute_import
+from __future__ import print_function, absolute_import
 from vizinfo import colors
 from builtins import range
 
