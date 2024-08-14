@@ -76,7 +76,7 @@ d.write("data.new")             write a LAMMPS data file
 
 
 try:
-    tmp = PIZZA_GUNZIP
+    from DEFAULTS import PIZZA_GUNZIP
 except BaseException:
     PIZZA_GUNZIP = "gunzip"
 

@@ -9,6 +9,7 @@
 # gl tool
 from __future__ import print_function, absolute_import
 from math import sin, cos, sqrt, pi, acos
+import sys
 from vizinfo import vizinfo
 import Image
 from OpenGL.GLUT import *

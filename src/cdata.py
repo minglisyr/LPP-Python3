@@ -2060,7 +2060,7 @@ class Capped:
             d1 = y - self.c1
             d2 = z - self.c2
             d3 = x
-        elif sef.axis == 'y':
+        elif self.axis == 'y':
             d1 = x - self.c1
             d2 = z - self.c2
             d3 = y

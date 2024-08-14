@@ -896,9 +896,10 @@ class tselect:
         cmd = "flag = " + teststr.replace("$t", "snaps[i].time")
         ccmd = compile(cmd, '', 'single')
         for i in range(data.nsnaps):
-            if not snaps[i].tselect:
-                continue
-            exec(ccmd)
+            if not snaps[i].tselect: continue
+            ldict = {'data':data,'snaps':snaps,'i':i}
+            exec(ccmd,globals(),ldict)
+            flag = ldict['flag']
             if not flag:
                 snaps[i].tselect = 0
                 data.nselect -= 1
@@ -954,9 +955,10 @@ class eselect:
                 if not snap.tselect:
                     continue
                 for i in range(snap.nelements):
-                    if not snap.eselect[i]:
-                        continue
-                    exec(ccmd)
+                    if not snap.eselect[i]: continue
+                    ldict = {'data':data,'snaps':snaps,'i':i}
+                    exec(ccmd,globals(),ldict)
+                    flag = ldict['flag']
                     if not flag:
                         snap.eselect[i] = 0
                         snap.nselect -= 1

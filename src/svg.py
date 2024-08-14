@@ -167,11 +167,11 @@ class svg:
     # --------------------------------------------------------------------
 
     def size(self, newx, newy=None):
-        self.xpixels = xnew
-        if not ynew:
+        self.xpixels = newx
+        if not newy:
             self.ypixels = self.xpixels
         else:
-            self.ypixels = ynew
+            self.ypixels = newy
 
     # --------------------------------------------------------------------
 

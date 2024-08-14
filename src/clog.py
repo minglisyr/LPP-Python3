@@ -55,7 +55,7 @@ c.write("file.txt","A","B",...)      write listed vectors to a file
 
 
 try:
-    tmp = PIZZA_GUNZIP
+    from DEFAULTS import PIZZA_GUNZIP
 except BaseException:
     PIZZA_GUNZIP = "gunzip"
 

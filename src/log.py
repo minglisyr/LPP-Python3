@@ -59,7 +59,7 @@ l.write("file.txt","Time","PE",...)  write listed vectors to a file
 
 
 try:
-    tmp = PIZZA_GUNZIP
+    from DEFAULTS import PIZZA_GUNZIP
 except BaseException:
     PIZZA_GUNZIP = "gunzip"
 
@@ -90,7 +90,7 @@ class log:
             self.read_all()
         else:
             if len(self.flist) > 1:
-                raise Exception("can only incrementally read one log file")
+                # # raise Exception("can only incrementally read one log file")
             self.increment = 1
             self.eof = 0
 
