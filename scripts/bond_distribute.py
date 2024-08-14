@@ -23,8 +23,7 @@ if "argv" not in globals():
 # main script
 
 if len(argv) < 7:
-    raise Exception(
-        "Syntax: bond_distribute.py datafile nbin rmin rmax outfile files ...")
+    raise Exception("Syntax: bond_distribute.py datafile nbin rmin rmax outfile files ...")
 
 dt = data(argv[1])
 nbins = int(argv[2])

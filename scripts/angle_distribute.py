@@ -23,8 +23,7 @@ if "argv" not in globals():
 # main script
 
 if len(argv) < 7:
-    raise Exception(
-        "Syntax: angle_distribute.py datafile nbin theta_min theta_max outfile files ...")
+    raise Exception("Syntax: angle_distribute.py datafile nbin theta_min theta_max outfile files ...")
 
 dt = data(argv[1])
 nbins = int(argv[2])
