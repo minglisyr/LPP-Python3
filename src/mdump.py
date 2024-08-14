@@ -956,7 +956,7 @@ class eselect:
                     continue
                 for i in range(snap.nelements):
                     if not snap.eselect[i]: continue
-                    ldict = {'data':data,'snaps':snaps,'i':i}
+                    ldict = {'snap':snap,'i':i}
                     exec(ccmd,globals(),ldict)
                     flag = ldict['flag']
                     if not flag:

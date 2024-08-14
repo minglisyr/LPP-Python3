@@ -91,7 +91,7 @@ class log:
         else:
             if len(self.flist) > 1:
                 # # raise Exception("can only incrementally read one log file")
-            self.increment = 1
+                self.increment = 1
             self.eof = 0
 
     # --------------------------------------------------------------------
