@@ -7,7 +7,7 @@
 # the GNU General Public License.
 
 # gl tool
-
+from __future__ import print_function, absolute_import
 from math import sin, cos, sqrt, pi, acos
 from vizinfo import vizinfo
 import Image

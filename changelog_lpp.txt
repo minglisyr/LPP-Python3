@@ -1,6 +1,6 @@
-2024-08-04 - Ming Li
+2024-08-14 - Ming
 + Python2 to Python3 conversion
-+ Compatibility debug ongoing
++ Main block (lpp.py, dump.py, vtk.py) is compatible with Python 2.7 and Python 3.11
 
 from 2012-02-22 on
 see git log

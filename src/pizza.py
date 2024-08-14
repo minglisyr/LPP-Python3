@@ -17,7 +17,7 @@
 
 # Help strings:
 
-from __future__ import absolute_import
+from __future__ import print_function, absolute_import
 import re
 import glob
 import string
@@ -25,7 +25,10 @@ import os
 import subprocess
 import sys
 from time import perf_counter
-version = "LPP 1.0 based on pizza - 2 Oct 2011"
+
+oneline = "writing pp-data in vtk format automatically, saving memory"
+
+version = "LPP 2.0 based on pizza - 2 Oct 2011"
 
 intro = """
 Pizza.py (%s), a toolkit written in Python

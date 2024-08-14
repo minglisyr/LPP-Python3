@@ -6,6 +6,8 @@
 # certain rights in this software.  This software is distributed under
 # the GNU General Public License.
 
+from __future__ import print_function, absolute_import
+
 # histo tool
 
 oneline = "Particle density histogram from a dump"
