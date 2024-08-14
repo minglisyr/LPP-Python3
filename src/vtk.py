@@ -320,8 +320,7 @@ def particleGran(file,atoms,names,nvalues):
   # if no atoms are present
   if atoms is None:
     atoms = []
-    print("No atoms present")
-
+    
   # find indices of scalars and vectors
   scalars, vectors = findScalarsAndVectors(names)
 
