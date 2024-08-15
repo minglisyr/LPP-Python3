@@ -574,9 +574,9 @@ class dump:
         ids[atoms[i][id]] = i
       for i in range(snap.natoms):
         j = ids[atoms[i][iother]]
-        atoms[i][x] += (atoms[i][ix]-atoms[j][ix])*xprd
-        atoms[i][y] += (atoms[i][iy]-atoms[j][iy])*yprd
-        atoms[i][z] += (atoms[i][iz]-atoms[j][iz])*zprd
+        atoms[i][x] += (atoms[i][ix] - atoms[j][ix])*xprd
+        atoms[i][y] += (atoms[i][iy] - atoms[j][iy])*yprd
+        atoms[i][z] += (atoms[i][iz] - atoms[j][iz])*zprd
       # should bonds also be owrapped ?
       if self.lineflag == 2 or self.triflag == 2:
         self.objextra.owrap(snap.time,xprd,yprd,zprd,ids,atoms,iother,ix,iy,iz)
@@ -757,7 +757,7 @@ class dump:
     for snap in self.snaps:
       if not snap.tselect: continue
       if snap.nselect != len(vec):
-        raise Exception("vec length does not match # of selected atoms")
+        raise Exception("Vector length does not match # of selected atoms")
       atoms = snap.atoms
       m = 0
       for i in range(snap.natoms):
@@ -773,6 +773,7 @@ class dump:
     icol = self.names[col]
     id = self.names["id"]
     ids = {}
+
     for i in range(self.snaps[istep].natoms):
       ids[self.snaps[istep].atoms[i][id]] = i
     for snap in self.snaps:
@@ -788,14 +789,16 @@ class dump:
 
   def spread(self,old,n,new):
     iold = self.names[old]
-    if new not in self.names: self.newcolumn(new)
-    inew = self.names[new]
 
+    if new not in self.names: self.newcolumn(new)
+
+    inew = self.names[new]
     min,max = self.minmax(old)
     print("min/max = ",min,max)
 
     gap = max - min
     invdelta = n/gap
+
     for snap in self.snaps:
       if not snap.tselect: continue
       atoms = snap.atoms

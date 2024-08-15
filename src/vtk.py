@@ -75,8 +75,8 @@ class vtk:
       sys.stdout.flush()
       n += 1
 
-    particle(file,allatoms)
-    print("\nwrote %d snapshots to %s in VTK format" % (n,file))
+    particle(file, allatoms)
+    print("\nwrote %d snapshots to %s in VTK format" % (n, file))
 
   # --------------------------------------------------------------------
 
@@ -216,7 +216,7 @@ def surface(tris):
   ntypes = tris[-1][1]
 
   for i in range(ntypes):
-    itype = i+1
+    itype = i + 1
     v = {}
     nvert = ntri = 0
     for tri in tris:

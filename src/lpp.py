@@ -165,8 +165,8 @@ class lpp:
 
     endtime = time.time()
     if self.output:
-      print("wrote", listlen,"granular snapshots in VTK format")
-      print("time needed:",endtime-starttime,"sec")
+      print("wrote", listlen, "granular snapshots in VTK format")
+      print("time needed:", endtime-starttime, "sec")
 
 def lppWorker(input):
   flist = input["filelist"]
@@ -180,9 +180,9 @@ def lppWorker(input):
   splitfname = flist[0].rsplit(".")
 
   if outfileName == "":
-    granName = splitfname[len(splitfname)-1]
+    granName = splitfname[len(splitfname) - 1]
   elif outfileName.endswith("/"):
-    granName = outfileName + splitfname[len(splitfname)-1]
+    granName = outfileName + splitfname[len(splitfname) - 1]
   else:
     granName = outfileName
 
@@ -234,9 +234,9 @@ def lppWorker(input):
 
     v = vtk.vtk(d)
 
-    if debugMode: print("\nfileNums: ",d.fileNums,"\n")
+    if debugMode: print("\nfileNums: ", d.fileNums, "\n")
 
-    v.manyGran(granName,fileNos=d.fileNums,output=debugMode)
+    v.manyGran(granName,fileNos=d.fileNums, output=debugMode)
   except KeyboardInterrupt:
     raise
 
