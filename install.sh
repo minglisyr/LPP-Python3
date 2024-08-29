@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir $HOME/bin
+
 PREFIX=$HOME/bin
 
 USAGE="usage\n\t./install.sh [-p path] [-h]\n\
